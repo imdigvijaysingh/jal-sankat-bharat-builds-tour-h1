@@ -3,7 +3,7 @@
         "lat": 29.97,
         "lon": 77.55,
         "pop": 705478,
-        "supply": 135,
+        "supply": 104.15,
         "gw": "Over-exploited",
         "gw_score": 85,
         "fallback": [

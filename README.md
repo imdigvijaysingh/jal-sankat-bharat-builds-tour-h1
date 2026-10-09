@@ -65,5 +65,18 @@ The 2%, 0.15% and weights are **assumptions**. Say so openly, and tune them with
 ## Hosting
 Localhost is enough for submission. If you want it online later, Render can host both parts (the free tier sleeps when idle).
 
-## Next steps
-Real data feeds, ML trained on past demand, ward-level maps, SMS/WhatsApp sending, AWS deployment.
+## Architecture & Roadmap (Built vs. Planned)
+
+**Currently Built & Working (MVP)**
+- **Frontend**: React (Vite) with dynamic UI, score visualisations, and heatwave slider.
+- **Backend**: FastAPI serving rules-based scoring model.
+- **Data Integration**: Live weather via Open-Meteo API.
+- **AI Planning**: Amazon Bedrock (Claude 3) integration for crisis response generation.
+- **Alerting**: Amazon SNS integration for sending SMS warnings to municipal engineers/citizens.
+
+**Planned Architecture (Future Scale)**
+- **Data Storage (Planned)**: Amazon DynamoDB to store historical water demand, supply logs, and ward population data.
+- **Compute (Planned)**: AWS Lambda for serverless, event-driven score recalculations when new data streams in.
+- **IoT Streaming (Planned)**: AWS IoT Core to ingest real-time smart meter data and tank levels.
+- **Advanced AI (Planned)**: Amazon SageMaker to train predictive machine learning models on past demand instead of the current rules-based assumptions.
+- **Visualisation (Planned)**: Interactive ward-level map highlighting stress zones geographically.

@@ -44,11 +44,20 @@ export default function App() {
   const [d, setD] = useState(null);
   const [err, setErr] = useState("");
   const [copied, setCopied] = useState(false);
+  
+  const [loadingPlan, setLoadingPlan] = useState(false);
+  const [aiPlan, setAiPlan] = useState(null);
+  const [phone, setPhone] = useState("");
+  const [sendingAlert, setSendingAlert] = useState(false);
+  const [alertStatus, setAlertStatus] = useState(null);
+
   const down = "Backend not running. Start it on port 8000 (see README).";
 
   useEffect(() => { fetch("/api/cities").then(r => r.json()).then(setCities).catch(() => setErr(down)); }, []);
   useEffect(() => {
     setErr("");
+    setAiPlan(null);
+    setAlertStatus(null);
     fetch(`/api/assess/${city}?heat_shift=${shift}`).then(r => r.json()).then(setD).catch(() => setErr(down));
   }, [city, shift]);
 
@@ -60,6 +69,42 @@ export default function App() {
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   }
+
+  const handleGeneratePlan = async () => {
+    setLoadingPlan(true);
+    try {
+      const res = await fetch("/api/plan", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          city: d.city, score: d.score, level: d.level, peak_day: d.peak_day, worst_ward: d.worst_ward, gap: d.gap, gw: d.gw
+        })
+      });
+      const data = await res.json();
+      setAiPlan(data);
+    } catch (e) {
+      console.error(e);
+    }
+    setLoadingPlan(false);
+  };
+
+  const handleSendAlert = async () => {
+    if (!phone) { alert("Please enter a phone number first."); return; }
+    setSendingAlert(true);
+    setAlertStatus(null);
+    try {
+      const res = await fetch("/api/alert", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone, message: sms })
+      });
+      const data = await res.json();
+      setAlertStatus(data);
+    } catch (e) {
+      setAlertStatus({ status: "error", detail: e.message });
+    }
+    setSendingAlert(false);
+  };
 
   return (
     <main className="min-h-screen bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-slate-50 via-blue-50/40 to-slate-100 text-slate-700 p-4 md:p-8 font-sans selection:bg-cyan-200 selection:text-cyan-900">
@@ -217,23 +262,38 @@ export default function App() {
 
           <div className="grid md:grid-cols-2 gap-6">
             <Card title="Recommended Actions" info="What the municipality should do now, based on the risk level.">
+              <div className="flex justify-between items-center mt-2">
+                <button onClick={handleGeneratePlan} disabled={loadingPlan} className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-xs font-bold transition-all shadow-sm disabled:opacity-50">
+                  {loadingPlan ? "Generating..." : "Generate AI Plan (Bedrock)"}
+                </button>
+                {aiPlan && <span className="text-xs text-indigo-600 font-bold bg-indigo-50 px-2 py-1 rounded border border-indigo-200">Source: {aiPlan.source}</span>}
+              </div>
               <ul className="space-y-3 mt-4">
-                {d.actions.map((a, i) => (
+                {(aiPlan ? aiPlan.plan.split('\n').filter(Boolean) : d.actions).map((a, i) => (
                   <li key={i} className="flex gap-3 text-sm text-slate-700 bg-white hover:bg-slate-50 transition-colors p-4 rounded-xl border border-slate-100 shadow-sm">
                     <span className="text-cyan-500 shrink-0 mt-0.5">➔</span>
-                    <span className="leading-relaxed font-medium">{a}</span>
+                    <span className="leading-relaxed font-medium">{a.replace(/^•\s*/, '')}</span>
                   </li>
                 ))}
               </ul>
             </Card>
             
             <Card title="Citizen Alert Message" info="Ready-to-send SMS for the worst ward. Copy it into your SMS system." className="flex flex-col">
-              <div className="flex gap-2 mb-4 bg-slate-100 p-1.5 rounded-lg w-max border border-slate-200">
-                {["en", "hi"].map(l => (
-                  <button key={l} onClick={() => setLang(l)} className={`px-5 py-1.5 rounded-md text-sm font-bold transition-all duration-300 ${lang === l ? "bg-white text-cyan-700 shadow-sm border border-slate-200/60" : "text-slate-500 hover:text-slate-700 hover:bg-white/50"}`}>
-                    {l === "en" ? "English" : "हिन्दी"}
+              <div className="flex justify-between items-start gap-4 mb-4">
+                <div className="flex gap-2 bg-slate-100 p-1.5 rounded-lg w-max border border-slate-200">
+                  {["en", "hi"].map(l => (
+                    <button key={l} onClick={() => setLang(l)} className={`px-5 py-1.5 rounded-md text-sm font-bold transition-all duration-300 ${lang === l ? "bg-white text-cyan-700 shadow-sm border border-slate-200/60" : "text-slate-500 hover:text-slate-700 hover:bg-white/50"}`}>
+                      {l === "en" ? "English" : "हिन्दी"}
+                    </button>
+                  ))}
+                </div>
+                <div className="flex flex-col gap-2 items-end w-48">
+                  <input type="text" placeholder="+91..." value={phone} onChange={e => setPhone(e.target.value)} className="w-full text-xs p-2 border border-slate-300 rounded focus:ring-2 focus:ring-cyan-500 outline-none shadow-sm" />
+                  <button onClick={handleSendAlert} disabled={sendingAlert} className="w-full bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-all shadow-sm disabled:opacity-50">
+                    {sendingAlert ? "Sending..." : "Send SMS (SNS)"}
                   </button>
-                ))}
+                  {alertStatus && <div className={`text-[10px] font-bold text-right leading-tight ${alertStatus.status === 'success' ? 'text-emerald-600' : 'text-amber-600'}`}>{alertStatus.detail}</div>}
+                </div>
               </div>
               <div className="relative group grow flex flex-col">
                 <div className="absolute inset-0 bg-gradient-to-br from-cyan-50 to-indigo-50 rounded-xl opacity-80 pointer-events-none"></div>
