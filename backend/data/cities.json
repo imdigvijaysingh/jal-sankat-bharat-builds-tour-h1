@@ -1,0 +1,138 @@
+{
+    "Saharanpur": {
+        "lat": 29.97,
+        "lon": 77.55,
+        "pop": 705478,
+        "supply": 135,
+        "gw": "Over-exploited",
+        "gw_score": 85,
+        "fallback": [
+            33,
+            34,
+            35,
+            36,
+            37,
+            38,
+            36
+        ],
+        "wards": [
+            {
+                "name": "Ward A (Old City)",
+                "pop": 0.40,
+                "sup": 0.30
+            },
+            {
+                "name": "Ward B (Civil Lines)",
+                "pop": 0.25,
+                "sup": 0.35
+            },
+            {
+                "name": "Ward C (Outskirts)",
+                "pop": 0.35,
+                "sup": 0.35
+            }
+        ]
+    },
+    "Mathura": {
+        "lat": 27.49,
+        "lon": 77.67,
+        "pop": 450000,
+        "supply": 60,
+        "gw": "Over-exploited",
+        "gw_score": 95,
+        "fallback": [
+            34,
+            34,
+            35,
+            35,
+            36,
+            37,
+            36
+        ],
+        "wards": [
+            {
+                "name": "Ward A (Temple Area)",
+                "pop": 0.45,
+                "sup": 0.30
+            },
+            {
+                "name": "Ward B (Cantt)",
+                "pop": 0.20,
+                "sup": 0.35
+            },
+            {
+                "name": "Ward C (Outskirts)",
+                "pop": 0.35,
+                "sup": 0.35
+            }
+        ]
+    },
+    "Meerut": {
+        "lat": 28.98,
+        "lon": 77.71,
+        "pop": 1305429,
+        "supply": 185,
+        "gw": "Over-exploited",
+        "gw_score": 90,
+        "fallback": [
+            33,
+            34,
+            35,
+            36,
+            36,
+            37,
+            35
+        ],
+        "wards": [
+            {
+                "name": "Ward A (Dense Core)",
+                "pop": 0.45,
+                "sup": 0.30
+            },
+            {
+                "name": "Ward B (Cantt)",
+                "pop": 0.15,
+                "sup": 0.30
+            },
+            {
+                "name": "Ward C (New Colonies)",
+                "pop": 0.40,
+                "sup": 0.40
+            }
+        ]
+    },
+    "Lucknow": {
+        "lat": 26.85,
+        "lon": 80.95,
+        "pop": 4200000,
+        "supply": 800,
+        "gw": "Critical",
+        "gw_score": 75,
+        "fallback": [
+            33,
+            33,
+            34,
+            35,
+            36,
+            36,
+            35
+        ],
+        "wards": [
+            {
+                "name": "Ward A (Old Lucknow)",
+                "pop": 0.35,
+                "sup": 0.30
+            },
+            {
+                "name": "Ward B (Gomti Nagar)",
+                "pop": 0.30,
+                "sup": 0.38
+            },
+            {
+                "name": "Ward C (Outskirts)",
+                "pop": 0.35,
+                "sup": 0.32
+            }
+        ]
+    }
+}
