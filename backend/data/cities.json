@@ -18,8 +18,8 @@
         "wards": [
             {
                 "name": "Ward A (Old City)",
-                "pop": 0.40,
-                "sup": 0.30
+                "pop": 0.4,
+                "sup": 0.3
             },
             {
                 "name": "Ward B (Civil Lines)",
@@ -53,11 +53,11 @@
             {
                 "name": "Ward A (Temple Area)",
                 "pop": 0.45,
-                "sup": 0.30
+                "sup": 0.3
             },
             {
                 "name": "Ward B (Cantt)",
-                "pop": 0.20,
+                "pop": 0.2,
                 "sup": 0.35
             },
             {
@@ -87,17 +87,17 @@
             {
                 "name": "Ward A (Dense Core)",
                 "pop": 0.45,
-                "sup": 0.30
+                "sup": 0.3
             },
             {
                 "name": "Ward B (Cantt)",
                 "pop": 0.15,
-                "sup": 0.30
+                "sup": 0.3
             },
             {
                 "name": "Ward C (New Colonies)",
-                "pop": 0.40,
-                "sup": 0.40
+                "pop": 0.4,
+                "sup": 0.4
             }
         ]
     },
@@ -121,11 +121,11 @@
             {
                 "name": "Ward A (Old Lucknow)",
                 "pop": 0.35,
-                "sup": 0.30
+                "sup": 0.3
             },
             {
                 "name": "Ward B (Gomti Nagar)",
-                "pop": 0.30,
+                "pop": 0.3,
                 "sup": 0.38
             },
             {

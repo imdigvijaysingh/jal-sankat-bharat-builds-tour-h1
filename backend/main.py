@@ -4,15 +4,27 @@ import httpx
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 app = FastAPI(title="Jal Sankat Early Warning")
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
-CITIES = json.loads((pathlib.Path(__file__).parent / "data" / "cities.json").read_text(encoding="utf-8"))
+CITIES_PATH = pathlib.Path(__file__).parent / "data" / "cities.json"
+CONFIG_PATH = pathlib.Path(__file__).parent / "data" / "config.json"
 
-LPCD = 135            # CPHEEO urban norm, litres per person per day
-HEAT_UPLIFT = 0.02    # +2% demand per degC above 30 (ASSUMPTION, tune with real data)
-GW_DERATE = 0.0015    # supply loss per groundwater stress point (ASSUMPTION)
-W = dict(heat=.25, gap=.30, ratio=.25, gw=.20)  # score weights (ASSUMPTION)
+CITIES = json.loads(CITIES_PATH.read_text(encoding="utf-8"))
+
+def get_config():
+    if not CONFIG_PATH.exists():
+        CONFIG_PATH.write_text(json.dumps({
+            "LPCD": 135,
+            "HEAT_UPLIFT": 0.02,
+            "GW_DERATE": 0.0015,
+            "W": {"heat": 0.25, "gap": 0.30, "ratio": 0.25, "gw": 0.20}
+        }))
+    return json.loads(CONFIG_PATH.read_text(encoding="utf-8"))
 
 async def get_forecast(c):
     try:
@@ -34,11 +46,42 @@ def level(score):
 def cities():
     return list(CITIES.keys())
 
+@app.get("/api/config")
+def read_config():
+    return get_config()
+
+@app.get("/api/cities/raw")
+def raw_cities():
+    return CITIES
+
+@app.post("/api/config")
+def update_config(new_config: dict):
+    CONFIG_PATH.write_text(json.dumps(new_config, indent=4))
+    return {"status": "success"}
+
+@app.post("/api/cities/update")
+def update_city(city_data: dict):
+    city_name = city_data.get("name")
+    if not city_name:
+        raise HTTPException(400, "City name required")
+    # Update the global object and save
+    c_data = {k: v for k, v in city_data.items() if k != "name"}
+    CITIES[city_name] = c_data
+    CITIES_PATH.write_text(json.dumps(CITIES, indent=4))
+    return {"status": "success"}
+
 @app.get("/api/assess/{city}")
 async def assess(city: str, heat_shift: float = 0):
     c = CITIES.get(city)
     if not c:
         raise HTTPException(404, "Unknown city")
+    
+    cfg = get_config()
+    LPCD = cfg["LPCD"]
+    HEAT_UPLIFT = cfg["HEAT_UPLIFT"]
+    GW_DERATE = cfg["GW_DERATE"]
+    W = cfg["W"]
+
     dates, temps, source = await get_forecast(c)
     temps = [round(t + heat_shift, 1) for t in temps]
     base = c["pop"] * LPCD / 1e6  # ML/day
@@ -66,13 +109,20 @@ async def assess(city: str, heat_shift: float = 0):
                         "Pre-position tankers and plan pumping schedule before " + day],
                "Moderate": ["Conservation messaging", f"Alert {worst}", "Keep reserve supply on standby"],
                "Low": ["Routine monitoring"]}[lvl]
+    if lvl == "High":
+        sms_en = f"CRITICAL WATER ALERT: High demand expected starting {day} in {worst} due to heat waves. Please decrease water consumption and store water at home for 2-3 days."
+        sms_hi = f"महत्वपूर्ण जल चेतावनी: लू (heat waves) के कारण {day} से {worst} में पानी की कमी हो सकती है। कृपया पानी का उपयोग कम करें और 2-3 दिनों के लिए पानी घर पर स्टोर करें।"
+    else:
+        sms_en = f"Water alert: high demand expected on {day} in {worst}. Please store water and avoid wastage."
+        sms_hi = f"जल चेतावनी: {day} को {worst} में पानी की मांग अधिक रहेगी। कृपया पानी जमा करें और बर्बादी रोकें।"
+
     return dict(city=city, level=lvl, score=score, source=source, peak_day=day,
         peak_temp=temps[pk], demand=round(dem[pk], 1), supply=round(supply, 1), gap=round(gap, 1), gw=c["gw"],
         components={k: round(v) for k, v in comp.items()}, weights=W,
         days=[dict(date=d, temp=t, demand=round(x, 1)) for d, t, x in zip(dates, temps, dem)],
         wards=wards, worst_ward=worst, actions=actions,
-        sms_en=f"Water alert: high demand expected on {day} in {worst}. Please store water and avoid wastage.",
-        sms_hi=f"जल चेतावनी: {day} को {worst} में पानी की मांग अधिक रहेगी। कृपया पानी जमा करें और बर्बादी रोकें।",
+        sms_en=sms_en,
+        sms_hi=sms_hi,
         provenance=[
             dict(item="Temperature forecast", kind="Measured" if source == "live" else "Estimated", src="Open-Meteo" if source == "live" else "Offline sample"),
             dict(item="Population", kind="Official", src="Census projection (placeholder)"),
@@ -125,8 +175,15 @@ def send_alert(req: AlertRequest):
     try:
         import boto3
         sns = boto3.client("sns", region_name="ap-south-1")
-        sns.publish(PhoneNumber=req.phone, Message=req.message)
-        return {"status": "success", "detail": "SMS sent successfully via Amazon SNS!"}
+        phones = [p.strip() for p in req.phone.split(",") if p.strip()]
+        for p in phones:
+            # Auto-format 10 digit Indian numbers to E.164
+            if len(p) == 10 and p.isdigit():
+                p = "+91" + p
+            elif not p.startswith("+"):
+                p = "+" + p
+            sns.publish(PhoneNumber=p, Message=req.message)
+        return {"status": "success", "detail": f"WhatsApp message sent to {len(phones)} number(s)!"}
     except Exception as e:
-        print("SNS error:", e)
-        return {"status": "fallback", "detail": "AWS SNS not configured. (Simulated success)"}
+        print("WhatsApp error:", e)
+        return {"status": "fallback", "detail": "WhatsApp API not configured. (Simulated success)"}

@@ -1,19 +1,50 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
+import AdminPanel from "./AdminPanel";
+import AIBrain from "./components/AIBrain";
+
+const BrainIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
+    <path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2Z"/>
+    <path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2Z"/>
+  </svg>
+);
 
 // The little (i) button
-const Info = ({ t }) => (
-  <span className="relative group inline-flex items-center justify-center ml-2 align-middle">
+const Info = ({ t, dir = "right" }) => (
+  <span className="relative group inline-flex items-center justify-center ml-2 align-middle z-50">
     <button type="button" aria-label="More information"
       className="w-[18px] h-[18px] rounded-full border border-slate-300 text-slate-400 hover:text-cyan-600 hover:border-cyan-600 hover:bg-cyan-50 transition-all flex items-center justify-center text-[11px] font-bold cursor-help shadow-sm">
       i
     </button>
-    <span role="tooltip" className="pointer-events-none opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity duration-300 absolute z-50 left-7 top-1/2 -translate-y-1/2 w-64 p-3 rounded-xl bg-white/95 backdrop-blur-xl border border-slate-200 text-slate-700 text-xs font-medium shadow-2xl leading-relaxed">{t}</span>
+    <span role="tooltip" className={`pointer-events-none opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity duration-300 absolute z-50 top-1/2 -translate-y-1/2 w-72 p-4 rounded-xl bg-white/95 backdrop-blur-xl border border-slate-200 text-slate-700 text-sm font-sans font-medium shadow-2xl leading-loose tracking-wide ${dir === 'left' ? 'right-7 text-right' : 'left-7 text-left'}`}>{t}</span>
   </span>
 );
 
-const Card = ({ title, info, children, className="" }) => (
+const AnimatedBrain = ({ city, d }) => {
+  return (
+    <div className="flex flex-col mt-4 max-w-md w-full">
+      <div className="relative w-full h-48 flex items-center justify-center overflow-hidden bg-[#03070d]/95 backdrop-blur-md rounded-xl border border-slate-700 shadow-xl group">
+        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-amber-500 via-orange-500 to-amber-500 bg-[length:200%_auto] animate-[gradient_2s_linear_infinite] z-20"></div>
+        
+        <div className="absolute inset-0 z-0">
+          <AIBrain thinking={d?.score >= 60} hue={42} density={1.2} />
+        </div>
+      </div>
+
+      {/* Floating Overlay Text (Moved outside the box) */}
+      <div className="mt-3 flex justify-center w-full pointer-events-none">
+        <div className="flex items-center gap-2 bg-white/80 backdrop-blur-sm border border-slate-200 px-3 py-1.5 rounded-full text-[9px] font-bold text-slate-600 uppercase tracking-widest shadow-sm">
+           <span className={`w-1.5 h-1.5 rounded-full bg-amber-500 ${d?.score >= 60 ? 'animate-ping' : ''}`}></span>
+           {city} AI Core • Score {d?.score || '--'}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const Card = ({ title, info, infoDir = "right", children, className="" }) => (
   <section className={`bg-white/70 backdrop-blur-md border border-white/80 shadow-[0_8px_30px_rgb(0,0,0,0.04)] rounded-2xl p-6 transition-all duration-300 hover:bg-white/90 hover:shadow-[0_12px_40px_rgb(0,0,0,0.08)] min-w-0 ${className}`}>
-    <h2 className="font-semibold text-lg text-slate-800 mb-4 flex items-center">{title}<Info t={info} /></h2>
+    <h2 className="font-semibold text-lg text-slate-800 mb-4 flex items-center">{title}<Info t={info} dir={infoDir} /></h2>
     {children}
   </section>
 );
@@ -45,11 +76,18 @@ export default function App() {
   const [err, setErr] = useState("");
   const [copied, setCopied] = useState(false);
   
+  const [contactsFile, setContactsFile] = useState(null);
+  const [sendingBulk, setSendingBulk] = useState(false);
+  const [bulkStatus, setBulkStatus] = useState(null);
+  const [hasPreviousData, setHasPreviousData] = useState(() => localStorage.getItem("hasPreviousData") === "true");
+  const autoDispatched = useRef(false);
+  
   const [loadingPlan, setLoadingPlan] = useState(false);
   const [aiPlan, setAiPlan] = useState(null);
   const [phone, setPhone] = useState("");
   const [sendingAlert, setSendingAlert] = useState(false);
   const [alertStatus, setAlertStatus] = useState(null);
+  const [showAdmin, setShowAdmin] = useState(false);
 
   const down = "Backend not running. Start it on port 8000 (see README).";
 
@@ -58,8 +96,25 @@ export default function App() {
     setErr("");
     setAiPlan(null);
     setAlertStatus(null);
-    fetch(`/api/assess/${city}?heat_shift=${shift}`).then(r => r.json()).then(setD).catch(() => setErr(down));
+    
+    const fetchAssess = () => {
+      fetch(`/api/assess/${city}?heat_shift=${shift}`)
+        .then(r => r.json())
+        .then(setD)
+        .catch(() => setErr(down));
+    };
+
+    fetchAssess();
+    const interval = setInterval(fetchAssess, 3000); // Polling every 3s for REAL-TIME data
+    return () => clearInterval(interval);
   }, [city, shift]);
+
+  useEffect(() => {
+    if (d && d.score >= 60 && hasPreviousData && !autoDispatched.current && !sendingBulk && !bulkStatus) {
+      autoDispatched.current = true;
+      handleSendBulk();
+    }
+  }, [d, hasPreviousData, sendingBulk, bulkStatus]);
 
   const maxD = d ? Math.max(...d.days.map(x => x.demand)) : 1;
   const sms = d ? (lang === "en" ? d.sms_en : d.sms_hi) : "";
@@ -106,6 +161,48 @@ export default function App() {
     setSendingAlert(false);
   };
 
+  const handleFileDrop = (e) => {
+    e.preventDefault();
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      setContactsFile(e.dataTransfer.files[0]);
+    }
+  };
+
+  const handleFileChange = (e) => {
+    if (e.target.files && e.target.files[0]) {
+      setContactsFile(e.target.files[0]);
+    }
+  };
+
+  const handleSendBulk = async () => {
+    if (!contactsFile && !hasPreviousData) {
+      alert("Please upload a contacts file first.");
+      return;
+    }
+    setSendingBulk(true);
+    setBulkStatus(null);
+    try {
+      const formData = new FormData();
+      if (contactsFile) formData.append("file", contactsFile);
+      formData.append("message", sms);
+      formData.append("ward", d.worst_ward);
+      
+      const res = await fetch("/api/bulk-alert", {
+        method: "POST",
+        body: formData
+      });
+      const data = await res.json();
+      setBulkStatus({ status: data.status || "success", detail: data.detail || `Bulk SMS dispatched successfully.` });
+      
+      localStorage.setItem("hasPreviousData", "true");
+      setHasPreviousData(true);
+      setContactsFile(null);
+    } catch (e) {
+      setBulkStatus({ status: "error", detail: e.message || "Failed to send bulk SMS." });
+    }
+    setSendingBulk(false);
+  };
+
   return (
     <main className="min-h-screen bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-slate-50 via-blue-50/40 to-slate-100 text-slate-700 p-4 md:p-8 font-sans selection:bg-cyan-200 selection:text-cyan-900">
       
@@ -114,28 +211,61 @@ export default function App() {
       <div className="fixed bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-indigo-400/20 rounded-full blur-[120px] pointer-events-none"></div>
 
       <div className="max-w-6xl mx-auto space-y-6 relative z-10">
-        <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-slate-200/60">
-          <div>
-            <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight mb-2">
+        <header className="flex flex-col md:flex-row justify-between gap-6 pb-6 border-b border-slate-200/60">
+          <div className="flex-1">
+            <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight mb-3 flex items-center flex-wrap gap-3">
               <span className="bg-clip-text text-transparent bg-gradient-to-r from-cyan-600 via-blue-600 to-indigo-600">
                 Jal Sankat
               </span>
+              <div className="flex items-center gap-2 bg-indigo-50 border border-indigo-100 px-3 py-1.5 rounded-full shadow-sm ml-2">
+                <div className="relative flex items-center justify-center w-4 h-4">
+                  <div className="absolute inset-0 bg-indigo-400 rounded-full animate-ping opacity-75"></div>
+                  <div className="relative text-indigo-600 animate-pulse"><BrainIcon /></div>
+                </div>
+                <span className="text-[10px] font-bold text-indigo-700 tracking-wider uppercase">AI Monitoring Active</span>
+              </div>
               <Info t="The name of the tool. 'Jal Sankat' means water crisis. It warns a city about water shortage days before it happens." />
             </h1>
             <p className="text-slate-500 text-lg font-medium">Water stress early warning platform for municipal teams.</p>
+            {d && <AnimatedBrain city={city} d={d} />}
           </div>
           
-          <div className="flex flex-wrap gap-5 items-end bg-white/60 p-4 rounded-2xl border border-white shadow-sm backdrop-blur-md">
-            <label className="text-sm font-semibold text-slate-600 flex flex-col gap-2">
-              <span className="flex items-center">Select City <Info t="Choose the city to analyse." /></span>
-              <select className="block w-40 bg-white border border-slate-200 rounded-lg px-3 py-2 text-slate-800 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500 transition-all cursor-pointer shadow-sm appearance-none font-medium" value={city} onChange={e => setCity(e.target.value)}>
-                {cities.map(c => <option key={c}>{c}</option>)}
-              </select>
-            </label>
-            <label className="text-sm font-semibold text-slate-600 flex flex-col gap-2">
-              <span className="flex items-center">Heat Shift: <span className="text-amber-600 ml-1 font-bold">+{shift}°C</span> <Info t="What-if slider. Test a heatwave scenario." /></span>
-              <input type="range" min="0" max="8" value={shift} onChange={e => setShift(+e.target.value)} className="block w-48 accent-amber-500 h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer" />
-            </label>
+          <div className="flex flex-col gap-4 w-full md:w-auto md:min-w-[500px]">
+            
+            {/* Live Map Filling Top Space (Cropped for clean UI) */}
+            <div className="w-full grow min-h-[140px] rounded-2xl overflow-hidden border border-slate-200 shadow-sm relative bg-slate-100 hidden md:block mt-2">
+              <div className="absolute inset-[-64px]">
+                <iframe 
+                  width="100%" 
+                  height="100%" 
+                  frameBorder="0" 
+                  scrolling="no" 
+                  marginHeight="0" 
+                  marginWidth="0" 
+                  src={`https://maps.google.com/maps?q=${encodeURIComponent(city)}&t=&z=10&ie=UTF8&iwloc=&output=embed`}
+                  className="w-full h-full grayscale-[0.3] contrast-[1.1] opacity-90 pointer-events-none"
+                ></iframe>
+              </div>
+            </div>
+
+            {/* Controls Box */}
+            <div className="flex flex-wrap gap-5 items-end bg-white/60 p-4 rounded-2xl border border-white shadow-sm backdrop-blur-md">
+              <label className="text-sm font-semibold text-slate-600 flex flex-col gap-2">
+                <span className="flex items-center">Select City <Info t="Choose the city to analyse." /></span>
+                <select className="block w-40 bg-white border border-slate-200 rounded-lg px-3 py-2 text-slate-800 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500 transition-all cursor-pointer shadow-sm appearance-none font-medium" value={city} onChange={e => setCity(e.target.value)}>
+                  {cities.map(c => <option key={c}>{c}</option>)}
+                </select>
+              </label>
+              
+              <label className="text-sm font-semibold text-slate-600 flex flex-col gap-2">
+                <span className="flex items-center">Heat Shift: <span className="text-amber-600 ml-1 font-bold">+{shift}°C</span> <Info t="What-if slider. Test a heatwave scenario." /></span>
+                <input type="range" min="0" max="8" value={shift} onChange={e => setShift(+e.target.value)} className="block w-48 accent-amber-500 h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer" />
+              </label>
+              
+              <button onClick={() => setShowAdmin(true)} className="px-4 py-2 ml-auto bg-slate-800 text-white rounded-lg font-bold text-sm shadow-md hover:bg-slate-700 transition-all h-[38px] shrink-0">
+                Admin Data
+              </button>
+            </div>
           </div>
         </header>
 
@@ -184,22 +314,31 @@ export default function App() {
 
           <div className="grid md:grid-cols-2 gap-6">
             <Card title="7-Day Demand Forecast" info="Red is the peak day. Demand rises about 2% for every degree above 30°C." className="flex flex-col">
-              <div className="flex items-end gap-3 h-48 mt-4 grow">
-                {d.days.map(x => (
-                  <div key={x.date} className="flex-1 flex flex-col items-center justify-end group">
-                    <div className="opacity-0 group-hover:opacity-100 transition-opacity text-xs bg-slate-800 px-2 py-1 rounded text-white mb-2 shadow-lg whitespace-nowrap">
-                      {x.demand} ML
-                    </div>
-                    <div 
-                      className={`w-full rounded-t-md transition-all duration-500 ease-out group-hover:brightness-110 shadow-sm ${x.demand === maxD ? "bg-gradient-to-t from-red-500 to-red-400" : "bg-gradient-to-t from-cyan-600 to-cyan-400"}`} 
-                      style={{ height: `${Math.max(12, (x.demand / maxD) * 100)}%` }} 
-                    />
-                    <div className="mt-3 text-center">
-                      <div className="text-xs font-bold text-slate-600">{new Date(x.date).toLocaleDateString("en-IN", { weekday: "short" })}</div>
-                      <div className="text-[10px] text-slate-500 font-bold">{x.temp}°</div>
-                    </div>
-                  </div>
-                ))}
+              <div className="flex gap-3 h-48 mt-4 grow">
+                {(() => {
+                  const minDemand = Math.min(...d.days.map(x => x.demand));
+                  const range = maxD - minDemand || 1;
+                  return d.days.map(x => {
+                    const heightPct = 30 + ((x.demand - minDemand) / range) * 70;
+                    return (
+                      <div key={x.date} className="flex-1 flex flex-col items-center justify-end group h-full">
+                        <div className="opacity-0 group-hover:opacity-100 transition-opacity text-xs bg-slate-800 px-2 py-1 rounded text-white mb-2 shadow-lg whitespace-nowrap">
+                          {x.demand} ML
+                        </div>
+                        <div className="w-full h-32 flex items-end">
+                          <div 
+                            className={`w-full rounded-t-md transition-all duration-500 ease-out group-hover:brightness-110 shadow-sm ${x.demand === maxD ? "bg-gradient-to-t from-red-500 to-red-400" : "bg-gradient-to-t from-cyan-600 to-cyan-400"}`} 
+                            style={{ height: `${heightPct}%` }} 
+                          />
+                        </div>
+                        <div className="mt-3 text-center">
+                          <div className="text-xs font-bold text-slate-600">{new Date(x.date).toLocaleDateString("en-IN", { weekday: "short" })}</div>
+                          <div className="text-[10px] text-slate-500 font-bold">{x.temp}°</div>
+                        </div>
+                      </div>
+                    );
+                  });
+                })()}
               </div>
               <p className="text-[10px] font-medium text-slate-400 mt-6 text-right border-t border-slate-100 pt-3">Source: {d.source === "live" ? "Live (Open-Meteo)" : "Offline Sample"}</p>
             </Card>
@@ -235,7 +374,7 @@ export default function App() {
                     <th className="px-5 py-4 font-bold tracking-wider">Demand</th>
                     <th className="px-5 py-4 font-bold tracking-wider">Supply</th>
                     <th className="px-5 py-4 font-bold tracking-wider">Gap</th>
-                    <th className="px-5 py-4 rounded-tr-lg font-bold tracking-wider">Severity<Info t="Gap as a percentage of demand." /></th>
+                    <th className="px-5 py-4 rounded-tr-lg font-bold tracking-wider">Severity<Info t="Gap as a percentage of demand." dir="left" /></th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
@@ -278,34 +417,113 @@ export default function App() {
               </ul>
             </Card>
             
-            <Card title="Citizen Alert Message" info="Ready-to-send SMS for the worst ward. Copy it into your SMS system." className="flex flex-col">
-              <div className="flex justify-between items-start gap-4 mb-4">
-                <div className="flex gap-2 bg-slate-100 p-1.5 rounded-lg w-max border border-slate-200">
-                  {["en", "hi"].map(l => (
-                    <button key={l} onClick={() => setLang(l)} className={`px-5 py-1.5 rounded-md text-sm font-bold transition-all duration-300 ${lang === l ? "bg-white text-cyan-700 shadow-sm border border-slate-200/60" : "text-slate-500 hover:text-slate-700 hover:bg-white/50"}`}>
-                      {l === "en" ? "English" : "हिन्दी"}
-                    </button>
-                  ))}
+            <Card title="AI Real-Time Bulk SMS Dispatch" info="Autonomous AI engine that monitors the stress score continuously and automatically dispatches emergency SMS to affected citizens if the score exceeds 60." infoDir="left" className={`flex flex-col ${d.score >= 60 ? 'ring-2 ring-red-500 shadow-[0_0_30px_rgba(239,68,68,0.2)]' : 'ring-1 ring-cyan-500/30'} relative overflow-hidden transition-all duration-500`}>
+              {d.score >= 60 && <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-red-600 via-orange-500 to-red-600 animate-pulse"></div>}
+              {d.score < 60 && <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-cyan-400 to-indigo-500"></div>}
+              
+              <div className="flex items-center justify-between mb-4 mt-2 relative z-10">
+                <div className="flex items-center gap-2.5 bg-slate-50/90 backdrop-blur px-3 py-1.5 rounded-full border border-slate-200 shadow-sm">
+                  <div className={`w-2.5 h-2.5 rounded-full animate-pulse ${d.score >= 60 ? 'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.8)]' : 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)]'}`}></div>
+                  <span className={`text-[11px] font-extrabold tracking-widest uppercase ${d.score >= 60 ? 'text-red-600' : 'text-emerald-700'}`}>
+                    {d.score >= 60 ? "CRITICAL ALERT ACTIVE" : "MONITORING ACTIVE"}
+                  </span>
                 </div>
-                <div className="flex flex-col gap-2 items-end w-48">
-                  <input type="text" placeholder="+91..." value={phone} onChange={e => setPhone(e.target.value)} className="w-full text-xs p-2 border border-slate-300 rounded focus:ring-2 focus:ring-cyan-500 outline-none shadow-sm" />
-                  <button onClick={handleSendAlert} disabled={sendingAlert} className="w-full bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-all shadow-sm disabled:opacity-50">
-                    {sendingAlert ? "Sending..." : "Send SMS (SNS)"}
-                  </button>
-                  {alertStatus && <div className={`text-[10px] font-bold text-right leading-tight ${alertStatus.status === 'success' ? 'text-emerald-600' : 'text-amber-600'}`}>{alertStatus.detail}</div>}
-                </div>
+                <div className="text-xs font-bold text-slate-500 bg-white/80 backdrop-blur px-3 py-1.5 rounded-lg border border-slate-200 shadow-sm">Live Score: <span className={`text-base ml-1 ${d.score >= 60 ? 'text-red-600' : 'text-slate-800'}`}>{d.score}</span></div>
               </div>
-              <div className="relative group grow flex flex-col">
-                <div className="absolute inset-0 bg-gradient-to-br from-cyan-50 to-indigo-50 rounded-xl opacity-80 pointer-events-none"></div>
-                <p className="relative text-sm text-slate-700 bg-white/60 backdrop-blur-sm border border-slate-200 p-5 rounded-xl leading-relaxed grow font-semibold whitespace-pre-wrap shadow-sm">
-                  {sms}
-                </p>
-                <button 
-                  className="absolute bottom-3 right-3 bg-cyan-600 hover:bg-cyan-700 text-white px-4 py-2 rounded-lg text-xs font-bold transition-all duration-300 shadow-md flex items-center gap-2 border border-cyan-500"
-                  onClick={handleCopy}
-                >
-                  {copied ? "✓ Copied!" : "Copy Text"}
-                </button>
+
+              <div className="bg-slate-900 rounded-xl p-5 border border-slate-800 shadow-inner relative overflow-hidden grow flex flex-col justify-end min-h-[260px]">
+                <div className="font-mono text-xs space-y-2.5 z-10">
+                  <p className="text-slate-500">{">"} AI bulk dispatch engine running on port 8000...</p>
+                  <p className="text-slate-400">{">"} Evaluating real-time stress for {city} <span className="text-cyan-600">[{new Date().toLocaleTimeString('en-US', { hour12: false })}]</span></p>
+                  
+                  {d.score >= 60 ? (
+                    <div className="space-y-3 animate-in fade-in slide-in-from-bottom-2 duration-500">
+                      <p className="text-red-400 font-bold">{">"} WARNING: Stress score ({d.score}) exceeded critical threshold (60).</p>
+                      <p className="text-slate-300">{">"} Isolating highest risk zone: <span className="text-white font-bold">{d.worst_ward}</span></p>
+                      
+                      <div className="bg-slate-800/80 p-3.5 rounded-lg border border-slate-700/50 text-slate-200 shadow-lg">
+                        <span className="text-red-400 font-bold text-sm">🚨 WATER CRISIS ALERT</span><br/>
+                        <span className="text-slate-300 mt-2 block leading-relaxed">
+                          Severe water shortage expected in your area. Immediate action required:
+                          <br/><br/>
+                          1. <strong className="text-white">INCREASE</strong> water storage immediately.<br/>
+                          2. <strong className="text-white">DECREASE</strong> non-essential water consumption.
+                        </span>
+                      </div>
+                      
+                      {!hasPreviousData && (
+                        <div className="mt-4 p-4 border-2 border-dashed border-slate-700 hover:border-cyan-500 bg-slate-900/50 rounded-xl transition-all"
+                             onDragOver={e => e.preventDefault()}
+                             onDrop={handleFileDrop}>
+                          <div className="flex flex-col items-center justify-center text-center gap-2">
+                            <svg className="w-8 h-8 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+                            <p className="text-sm font-semibold text-slate-300">Drag & Drop Contact List</p>
+                            <p className="text-[10px] text-slate-500">Supports .csv, .xlsx</p>
+                            <input type="file" id="fileUpload" className="hidden" accept=".csv, .xlsx" onChange={handleFileChange} />
+                            <label htmlFor="fileUpload" className="mt-2 px-3 py-1 bg-slate-800 text-white text-xs rounded border border-slate-700 cursor-pointer hover:bg-slate-700 transition-colors">Browse Files</label>
+                          </div>
+                        </div>
+                      )}
+                      
+                      {contactsFile && (
+                        <div className="flex items-center justify-between bg-emerald-900/30 border border-emerald-500/50 p-2 rounded-lg mt-2">
+                          <div className="flex items-center gap-2 overflow-hidden">
+                            <svg className="w-4 h-4 text-emerald-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            <span className="text-emerald-300 text-xs font-semibold truncate">{contactsFile.name}</span>
+                          </div>
+                          <button onClick={() => setContactsFile(null)} className="text-slate-400 hover:text-red-400 p-1"><svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
+                        </div>
+                      )}
+                      
+                      {sendingBulk ? (
+                        <div className="w-full mt-3 bg-slate-800 rounded-lg p-3 border border-slate-700 shadow-lg">
+                          <style>{`
+                            @keyframes loadBar {
+                              0% { transform: translateX(-100%); }
+                              100% { transform: translateX(100%); }
+                            }
+                            .animate-load-bar {
+                              animation: loadBar 2s infinite linear;
+                            }
+                          `}</style>
+                          <div className="flex justify-between text-[11px] font-bold text-cyan-400 mb-2.5">
+                            <span>SENDING SMS TO LOCAL PEOPLE...</span>
+                            <span className="animate-pulse">DISPATCHING</span>
+                          </div>
+                          <div className="w-full bg-slate-900 rounded-full h-1.5 overflow-hidden relative">
+                            <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-cyan-600 via-cyan-400 to-cyan-600 animate-load-bar"></div>
+                          </div>
+                        </div>
+                      ) : (
+                        <button 
+                          onClick={handleSendBulk} 
+                          disabled={!contactsFile && !hasPreviousData}
+                          className={`w-full mt-3 py-2.5 rounded-lg text-sm font-bold flex items-center justify-center gap-2 transition-all shadow-lg
+                            ${(contactsFile || hasPreviousData) ? 'bg-cyan-600 hover:bg-cyan-500 text-white shadow-cyan-900/50' : 'bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700'}`}
+                        >
+                          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+                          Dispatch Bulk SMS Now
+                        </button>
+                      )}
+                      
+                      {bulkStatus && (
+                        <div className={`p-2 rounded mt-2 text-xs font-semibold ${bulkStatus.status === 'success' ? 'bg-emerald-900/40 text-emerald-400 border border-emerald-500/50' : 'bg-red-900/40 text-red-400 border border-red-500/50'}`}>
+                          {">"} {bulkStatus.detail}
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="space-y-2.5 text-slate-400 mt-4">
+                      <p className="text-emerald-500">{">"} Score {d.score} is below critical threshold (60).</p>
+                      <p>{">"} Conditions optimal. No bulk alerts necessary.</p>
+                      <p className="animate-pulse">_</p>
+                    </div>
+                  )}
+                </div>
+                
+                {/* Background decorative elements */}
+                <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-slate-800 rounded-full blur-3xl opacity-50"></div>
+                {d.score >= 60 && <div className="absolute top-10 right-10 w-32 h-32 bg-red-900/20 rounded-full blur-2xl"></div>}
               </div>
             </Card>
           </div>
@@ -327,6 +545,7 @@ export default function App() {
           </Card>
         </>}
       </div>
+      {showAdmin && <AdminPanel onClose={() => setShowAdmin(false)} />}
     </main>
   );
 }
