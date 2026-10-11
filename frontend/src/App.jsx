@@ -290,9 +290,9 @@ export default function App() {
             }`}
           >
             <span>📖</span>
-            <span>Hackathon Story & Architecture Blog</span>
-            <span className="hidden sm:inline-block bg-amber-100 text-amber-900 text-[10px] px-2 py-0.5 rounded-full font-black uppercase tracking-wider border border-amber-300">
-              AirPods Entry
+            <span>The 72-Hour Warning (Story & Solution)</span>
+            <span className="hidden sm:inline-block bg-blue-100 text-blue-900 text-[10px] px-2 py-0.5 rounded-full font-black uppercase tracking-wider border border-blue-300">
+              Crisis & Defense
             </span>
           </button>
         </div>
@@ -302,8 +302,8 @@ export default function App() {
             onClick={() => setActiveView("blog")}
             className="text-xs font-bold text-cyan-700 hover:text-cyan-800 bg-cyan-50/80 hover:bg-cyan-100 border border-cyan-200 px-3 py-1.5 rounded-lg transition-all hidden md:flex items-center gap-1.5"
           >
-            <span>🎧</span>
-            <span>Read: "The Day Saharanpur Ran Out of Water"</span>
+            <span>💧</span>
+            <span>Read Story: "When India’s Ground Runs Dry"</span>
             <span>→</span>
           </button>
         )}
