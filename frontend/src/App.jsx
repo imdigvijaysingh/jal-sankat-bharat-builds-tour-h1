@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import AdminPanel from "./AdminPanel";
 import AIBrain from "./components/AIBrain";
 import AuthModal from "./components/AuthModal";
+import Blog from "./Blog";
 import { apiUrl } from "./config";
 import { assessClientSide, CITIES_DATA } from "./offlineFallback";
 
@@ -93,6 +94,7 @@ export default function App() {
   const [showAdmin, setShowAdmin] = useState(false);
   const [authToken, setAuthToken] = useState(() => localStorage.getItem("adminToken") || "");
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [activeView, setActiveView] = useState("dashboard");
 
   const handleOpenAdmin = () => {
     if (authToken) {
@@ -258,19 +260,67 @@ export default function App() {
   };
 
   return (
-    <main className="min-h-screen bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-slate-50 via-blue-50/40 to-slate-100 text-slate-700 p-4 md:p-8 font-sans selection:bg-cyan-200 selection:text-cyan-900">
+    <main className={`min-h-screen bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-slate-50 via-blue-50/40 to-slate-100 text-slate-700 font-sans selection:bg-cyan-200 selection:text-cyan-900 ${activeView === "blog" ? "p-1 sm:p-2 md:p-3" : "p-3 sm:p-6 md:p-8"}`}>
       
       {/* Decorative background blurs */}
       <div className="fixed top-[-10%] left-[-10%] w-[40%] h-[40%] bg-cyan-400/20 rounded-full blur-[120px] pointer-events-none"></div>
       <div className="fixed bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-indigo-400/20 rounded-full blur-[120px] pointer-events-none"></div>
 
-      <div className="max-w-6xl mx-auto space-y-6 relative z-10">
-        <header className="flex flex-col md:flex-row justify-between gap-6 pb-6 border-b border-slate-200/60">
-          <div className="flex-1">
-            <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight mb-3 flex items-center flex-wrap gap-3">
-              <span className="bg-clip-text text-transparent bg-gradient-to-r from-cyan-600 via-blue-600 to-indigo-600">
-                Jal Sankat
-              </span>
+      {/* Global Top Nav Mode Tabs */}
+      <nav className={`mx-auto mb-4 relative z-20 flex items-center justify-between flex-wrap gap-2 ${activeView === "blog" ? "w-full max-w-full px-1" : "max-w-6xl"}`}>
+        <div className="flex items-center gap-1.5 p-1 bg-white/80 backdrop-blur-md rounded-xl border border-slate-200 shadow-xs">
+          <button
+            onClick={() => setActiveView("dashboard")}
+            className={`px-3 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition-all flex items-center gap-1.5 ${
+              activeView === "dashboard"
+                ? "bg-slate-900 text-white shadow-xs"
+                : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
+            }`}
+          >
+            <span>📊</span>
+            <span>Operations Dashboard</span>
+          </button>
+          
+          <button
+            onClick={() => setActiveView("blog")}
+            className={`px-3 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition-all flex items-center gap-1.5 ${
+              activeView === "blog"
+                ? "bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-xs"
+                : "text-slate-700 hover:text-slate-900 hover:bg-slate-100"
+            }`}
+          >
+            <span>📖</span>
+            <span>Hackathon Story & Architecture Blog</span>
+            <span className="hidden sm:inline-block bg-amber-100 text-amber-900 text-[10px] px-2 py-0.5 rounded-full font-black uppercase tracking-wider border border-amber-300">
+              AirPods Entry
+            </span>
+          </button>
+        </div>
+
+        {activeView === "dashboard" && (
+          <button
+            onClick={() => setActiveView("blog")}
+            className="text-xs font-bold text-cyan-700 hover:text-cyan-800 bg-cyan-50/80 hover:bg-cyan-100 border border-cyan-200 px-3 py-1.5 rounded-lg transition-all hidden md:flex items-center gap-1.5"
+          >
+            <span>🎧</span>
+            <span>Read: "The Day Saharanpur Ran Out of Water"</span>
+            <span>→</span>
+          </button>
+        )}
+      </nav>
+
+      {activeView === "blog" ? (
+        <div className="w-full max-w-full relative z-10">
+          <Blog onBackToDashboard={() => setActiveView("dashboard")} />
+        </div>
+      ) : (
+        <div className="max-w-6xl mx-auto space-y-6 relative z-10">
+          <header className="flex flex-col md:flex-row justify-between gap-6 pb-6 border-b border-slate-200/60">
+            <div className="flex-1">
+              <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight mb-3 flex items-center flex-wrap gap-3">
+                <span className="bg-clip-text text-transparent bg-gradient-to-r from-cyan-600 via-blue-600 to-indigo-600">
+                  Jal Sankat
+                </span>
               <div className="flex items-center gap-2 bg-indigo-50 border border-indigo-100 px-3 py-1.5 rounded-full shadow-sm ml-2">
                 <div className="relative flex items-center justify-center w-4 h-4">
                   <div className="absolute inset-0 bg-indigo-400 rounded-full animate-ping opacity-75"></div>
@@ -712,6 +762,7 @@ export default function App() {
           </Card>
         </>}
       </div>
+      )}
       <AuthModal 
         isOpen={showAuthModal} 
         onClose={() => setShowAuthModal(false)} 
