@@ -9,6 +9,11 @@ load_dotenv()
 
 app = FastAPI(title="Jal Sankat Early Warning")
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
+
+@app.get("/")
+@app.get("/health")
+def health_check():
+    return {"status": "ok", "service": "Jal Sankat Early Warning API"}
 CITIES_PATH = pathlib.Path(__file__).parent / "data" / "cities.json"
 CONFIG_PATH = pathlib.Path(__file__).parent / "data" / "config.json"
 
