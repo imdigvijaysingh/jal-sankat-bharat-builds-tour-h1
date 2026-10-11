@@ -431,6 +431,21 @@ Next summer, when temperatures pass 40°C in Saharanpur, taps will not run dry i
               </div>
             </div>
 
+            <Reveal delay={100}>
+              <figure className="my-5 rounded-2xl overflow-hidden border border-slate-200 shadow-md bg-slate-900 group">
+                <img 
+                  src="/images/dry_tap_crisis.jpg" 
+                  alt="Dry brass water tap in Indian municipality during summer heatwave" 
+                  className="w-full h-auto max-h-[480px] object-cover object-center group-hover:scale-[1.01] transition-transform duration-500" 
+                  loading="lazy"
+                />
+                <figcaption className="p-3.5 sm:p-4 text-xs sm:text-sm text-slate-300 bg-slate-900/95 backdrop-blur-md flex items-center justify-between gap-3 border-t border-slate-800">
+                  <span><strong>Ground Reality:</strong> Empty brass tap in an Indian municipal district during peak 38°C heat, with plastic drums lined along the street.</span>
+                  <span className="text-xs text-cyan-400 font-mono shrink-0 font-bold">FIG 1.0</span>
+                </figcaption>
+              </figure>
+            </Reveal>
+
             <p className="text-base sm:text-lg md:text-xl text-slate-700 leading-relaxed mt-3">
               Yet on Monday morning—just two days earlier—the officer’s logbook had said everything was normal. 
               <em>How did a modern Indian city lose 14.6 million liters of water overnight without anyone noticing?</em>
@@ -496,6 +511,21 @@ Next summer, when temperatures pass 40°C in Saharanpur, taps will not run dry i
               </div>
             </Reveal>
           </div>
+
+          <Reveal delay={100}>
+            <figure className="my-5 rounded-2xl overflow-hidden border border-slate-200 shadow-md bg-slate-900 group">
+              <img 
+                src="/images/groundwater_depletion.jpg" 
+                alt="3D geological diagram of groundwater aquifer depletion beneath city" 
+                className="w-full h-auto max-h-[480px] object-cover object-center group-hover:scale-[1.01] transition-transform duration-500" 
+                loading="lazy"
+              />
+              <figcaption className="p-3.5 sm:p-4 text-xs sm:text-sm text-slate-300 bg-slate-900/95 backdrop-blur-md flex items-center justify-between gap-3 border-t border-slate-800">
+                <span><strong>The Double Trap:</strong> 3D architectural cutaway showing urban thermal heat dome expanding domestic consumption while deep borewells pull subterranean water tables down.</span>
+                <span className="text-xs text-cyan-400 font-mono shrink-0 font-bold">FIG 2.0</span>
+              </figcaption>
+            </figure>
+          </Reveal>
 
           {/* Stat Comparison */}
           <Reveal delay={110}>
@@ -563,6 +593,19 @@ Next summer, when temperatures pass 40°C in Saharanpur, taps will not run dry i
             <p className="text-base sm:text-lg md:text-xl text-slate-700 leading-relaxed mt-3">
               To stop this crisis, we built <strong>Jal Sankat (जल संकट)</strong>. It is an early-warning defense system that acts like a 24/7 radar for city water:
             </p>
+
+            <figure className="my-5 rounded-2xl overflow-hidden border border-slate-200 shadow-md bg-slate-900 group">
+              <img 
+                src="/images/satellite_ai_defense.jpg" 
+                alt="Spaceborne climate satellite scanning thermal anomalies over India with AWS AI" 
+                className="w-full h-auto max-h-[480px] object-cover object-center group-hover:scale-[1.01] transition-transform duration-500" 
+                loading="lazy"
+              />
+              <figcaption className="p-3.5 sm:p-4 text-xs sm:text-sm text-slate-300 bg-slate-900/95 backdrop-blur-md flex items-center justify-between gap-3 border-t border-slate-800">
+                <span><strong>Spaceborne Early Warning:</strong> Satellite thermal scans detect incoming heat domes over Northern India 7 days in advance, analyzed by Amazon Bedrock AI.</span>
+                <span className="text-xs text-cyan-400 font-mono shrink-0 font-bold">FIG 3.0</span>
+              </figcaption>
+            </figure>
           </Reveal>
 
           {/* The 4 Steps in Plain Cards */}
