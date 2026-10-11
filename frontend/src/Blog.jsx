@@ -1,181 +1,155 @@
 import { useState } from "react";
 
+// Interactive Glossary Term with Easy Hover & Tap Explanation
+function Term({ word, explain, tag = "Simple Meaning" }) {
+  const [active, setActive] = useState(false);
+
+  return (
+    <span 
+      className="relative inline-block cursor-help group mx-0.5 align-baseline"
+      onMouseEnter={() => setActive(true)}
+      onMouseLeave={() => setActive(false)}
+      onClick={() => setActive(!active)}
+    >
+      <span className="font-semibold text-cyan-800 bg-cyan-50 hover:bg-cyan-100/90 border-b-2 border-dotted border-cyan-500 px-1.5 py-0.5 rounded transition-all inline-flex items-center gap-1 shadow-xs">
+        <span>{word}</span>
+        <span className="text-[10px] text-cyan-600 bg-cyan-200/70 rounded-full w-3.5 h-3.5 inline-flex items-center justify-center font-bold">?</span>
+      </span>
+
+      {/* Floating Popover Card */}
+      <span 
+        role="tooltip"
+        className={`pointer-events-none transition-all duration-200 absolute z-50 bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 sm:w-72 p-3 rounded-xl bg-slate-900/95 text-white text-xs shadow-2xl backdrop-blur-md border border-slate-700 leading-relaxed font-sans ${
+          active ? "opacity-100 scale-100" : "opacity-0 scale-95 pointer-events-none"
+        }`}
+      >
+        <span className="flex items-center justify-between text-[10px] font-black uppercase tracking-wider text-cyan-300 pb-1 mb-1 border-b border-slate-700">
+          <span>💡 {tag}</span>
+          <span className="text-slate-400 font-mono text-[9px]">{word}</span>
+        </span>
+        <span className="text-slate-200 block text-xs leading-normal font-normal">
+          {explain}
+        </span>
+        <span className="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-4 border-transparent border-t-slate-900"></span>
+      </span>
+    </span>
+  );
+}
+
 export default function Blog({ onBackToDashboard }) {
   const [copied, setCopied] = useState(false);
 
-  const blogMarkdown = `# The 72-Hour Warning: When India’s Ground Runs Dry
-### *How a Silent Heatwave Nearly Paralyzed 700,000 People—And How Jal Sankat Foresees the Crisis Before the First Tap Fails*
+  const plainMarkdown = `# The 72-Hour Warning: When a City’s Water Runs Out Before Anyone Notices
+### *How a sudden heatwave almost left 700,000 people without water—and how Jal Sankat alerts the city 7 days before taps run dry.*
 
-> **"A city does not run out of water on the day it rains. It runs out 72 hours before anyone realizes the heat curve has crossed the point of no return."**
+> "A city does not run out of water on the day it rains. It runs out 72 hours before anyone smells the danger."
 
-It begins with a sound that every municipal engineer in India dreads: *nothing*. 
+It begins on a Wednesday morning in Saharanpur, Uttar Pradesh (a city of 705,000 people). 
+The summer temperature reaches 38.4°C. 
+A mother turns on her kitchen tap. She expects cool water for tea and cooking. 
+Instead, she hears only a dry, whistling hiss: air, not water.
 
-No rush of water through the 400mm cast-iron mains. No thrum of centrifugal booster pumps in the municipal pumphouse. Just a hollow, wheezing gasp of trapped air escaping through a dry brass tap in **Ward 1 (Nawab Ganj)**.
+Outside, neighbors line up blue plastic drums on the road. Children miss school to guard buckets in line. Private water tanker trucks start charging ₹1,800 for a single tank. At the city water office, furious people crowd the gates asking: "Why did no one tell us?"
 
-By 7:30 AM on a scorching Wednesday, the temperature in **Saharanpur—a bustling industrial hub of 705,000 citizens in Western Uttar Pradesh—**has already crossed **38.4°C**. 
+Yet two days earlier on Monday, the official water dials looked completely safe. 
 
-Down in the lanes of Purani Mandi and Sharda Nagar, the scene repeats with agonizing predictability:
-* Blue plastic drums lined up in crooked rows along the asphalt.
-* Parents skipping work and children missing morning school to stand in tanker queues.
-* Informal water tankers charging ₹1,800 for 1,000 liters of murky borewell water.
-* Furious crowds surrounding the municipal water office demanding to know: *"Why didn't you warn us?"*
-
-And inside the control room, the junior engineer stares at his logbook with sunken eyes. 
-On Monday morning, the reservoir had looked fine. The pipeline pressure gauges had read green. 
-
-*How did a modern Indian city lose 14.6 million liters of water overnight?*
+How does a whole city lose 14.6 million liters of water in just 48 hours without warning?
 
 ---
 
-## 01. The Anatomy of an Invisible Collapse: The Thermal Scissors Effect
+## 1. The Double Trap: Why Heat Silently Breaks City Water
 
-The truth is as terrifying as it is simple: **Saharanpur did not run out of water on Wednesday. Its fate was sealed the previous Sunday.**
+Most people think cities only run dry during long droughts. But in real life, water collapses in a fast "Double Trap":
 
-What happened wasn't a sudden pipeline burst or a power outage. It was the brutal, unyielding math of the **Thermal Scissors Effect**—the silent crisis crippling hundreds of tier-2 and tier-3 Indian cities.
+### Trap #1: Everyone Suddenly Needs More Water
+When the temperature climbs above 25°C, every household starts running desert coolers (each cooler swallows 40 to 60 liters of water every day). People shower more, wash dusty floors, and animals drink triple.
+For every single 1°C rise in heat, the whole city's water demand jumps by +2%.
+In 48 hours, daily demand jumped from 95 Million Liters to 105.5 Million Liters.
 
-Here is the extraordinary fact that most urban planners ignore:
-> 💡 **India extracts more groundwater than China and the United States combined.**
-> Over **250 billion cubic meters** of water are sucked out from beneath our feet every single year. In cities like Saharanpur, Meerut, and Jaipur, over **80% of municipal drinking supply** depends on an invisible, over-extracted grid of deep tube wells.
+### Trap #2: Underground Tube Wells Start Sucking Air
+India pumps more underground water than the US and China combined (over 250 billion cubic meters a year). 
+Over 80% of drinking water in cities like Saharanpur comes from underground borewells.
+When thousands of neighborhood motors turn on at the exact same hour, the underground water level falls fast. The deep pumps can't reach the water anymore and their yield drops.
 
-When an abnormal thermal dome settles over Northern India and ambient temperatures cross **25°C**, two catastrophic forces collide:
+### The Missing 14.6 Million Liters
+* Water people needed: 105.5 Million Liters
+* Water the city could actually pump: 90.9 Million Liters
+* The Shortage: 14.6 Million Liters every day
 
-### 1. Demand Rockets Skyward (The Upper Blade)
-The human response to heat is non-linear. According to hydrological research and municipal consumption tracking, domestic water usage spikes by **+2.0% for every single degree Celsius above 25°C**:
-* Hundreds of thousands of evaporative desert coolers run 24 hours a day, each gulping **40 to 60 liters of water daily**.
-* Families wash down baking rooftops and dust-choked verandas.
-* Livestock and stray animals consume triple their normal intake.
-* At +3°C heat uplift, a baseline municipal demand of **95.2 Million Liters/day (ML/day)** explodes into **105.5 ML/day** in under 48 hours.
-
-### 2. Deep-Aquifer Yield Chokes (The Lower Blade)
-At the exact moment demand surges, the groundwater grid betrays the city. Deep borewells, stressed by simultaneous continuous extraction across thousands of private and municipal pumps, suffer **hydraulic thermal drawdown**. Aquifer yield degrades by **0.15% per stress index point**. 
-
-The city's effective supply plummets from 100 ML/day down to **90.9 ML/day**.
-
-### The Looming Deficit: 14.6 Million Liters Every 24 Hours
-* **Peak Demand:** 105.5 ML/day
-* **Shrinking Supply:** 90.9 ML/day
-* **The Deficit:** **14.6 ML/day**
-
-That missing 14.6 ML/day is not an abstract statistical figure. It is equal to **5,840 commercial water tankers** vanishing into thin air every single day.
+How big is 14.6 Million Liters?
+Imagine 5,840 big blue water tanker trucks lined up bumper-to-bumper. That much water vanished in one day.
 
 ---
 
-## 02. The Fatal Flaw: The 72-Hour Blind Spot
+## 2. The 72-Hour Blind Spot: Why Nobody Knew
 
-Why do Indian cities suffer this every summer?
+City water departments usually work by waiting for telephone complaints. 
+By the time families realize their taps are dry and call the complaint number:
+* The underground wells are already exhausted.
+* The big overhead water tanks are already drained.
+* The nearest available water trucks are 36 hours away.
 
-Because municipal water departments are forced to operate **in the blind rear-view mirror**.
+City officials were managing the crisis like looking in a rear-view mirror: reacting only after the disaster happened.
 
-They rely on static spreadsheets, manual dip-stick reservoir readings, and complaints from ward councilors. By the time a citizen calls the helpline saying their tap is dry, **the aquifer has already been de-pressurized, the overhead tanks are empty, and the nearest available tanker fleet is 36 hours away**.
-
-Disaster management in urban India is fundamentally **reactive**. We wait for the panic, and then we scramble to clean up the mess.
-
-We asked a radical question:
-***What if the city knew the exact day, the exact hour, and the exact ward that would run out of water—7 full days before the first tap hissed dry?***
-
----
-
-## 03. Enter Jal Sankat: The Autonomous 7-Day Early Warning Nerve Center
-
-To break this vicious cycle, we engineered **Jal Sankat (जल संकट)**.
-
-Jal Sankat is not another cosmetic dashboard. It is an **autonomous hydrological early-warning and tactical dispatch nerve center** engineered specifically for municipal engineers in the climate-stressed towns of Bharat.
-
-Here is how the intelligence pipeline works:
-
-\`\`\`text
-┌─────────────────────────────────────────────────────────────────────────┐
-│                 JAL SANKAT: 7-DAY WATER CRISIS PIPELINE                 │
-└─────────────────────────────────────────────────────────────────────────┘
-       │
-       ▼
- [ 1. Spaceborne Satellite Telemetry ] ──► Live Open-Meteo 7-day thermal forecasts
-       │
-       ▼
- [ 2. CPHEEO Hydrological Engine ]    ──► 135 LPCD baseline + dynamic heat uplift
-       │                                  + non-linear aquifer drawdown derate
-       ▼
- [ 3. Micro-Ward Deficit Localization] ──► Identifies which specific neighborhood
-       │                                  will dry up first (e.g. Ward 1: 42% gap)
-       ├──────────────────────────────────────────────┐
-       ▼                                              ▼
- [ 4. AI Strategic Commander ]              [ 5. Emergency Carrier Dispatch ]
-   * Powered by Amazon Bedrock Claude 3       * Multi-carrier SMS in Hindi & English
-   * Synthesizes 3-bullet triage plan         * Real-time alerts to tanker drivers
-   * Sub-800ms ward-specific rationing        * Reaches field teams before pressure dies
-\`\`\`
-
-### 1. Ingesting Atmospheric Heat Anomalies in Real Time
-Every hour, Jal Sankat pulls live meteorological satellite feeds from Open-Meteo, monitoring surface temperature anomalies and wind patterns across 7 predictive days for targeted cities.
-
-### 2. The CPHEEO Hydrological Balance Core
-Instead of ungrounded estimates, our physics model is anchored to India’s official **CPHEEO standard (135 Liters per capita per day)**:
-\`\`\`python
-# Baseline consumption across ward populations
-base_demand = (city_population * 135) / 1_000_000  # ML/day
-
-# Thermal uplift activated only when ambient temp exceeds base threshold (25°C)
-heat_uplift = 0.02 * max(0, peak_temperature - 25)
-projected_demand = base_demand * (1 + heat_uplift)
-
-# Realized supply derated against deep-aquifer vulnerability
-effective_supply = nominal_supply * (1 - 0.0015 * groundwater_stress_score)
-
-# Ward-level triage
-ward_gap = max(0, ward_demand - ward_allocated_supply)
-\`\`\`
-
-### 3. The Generative AI General: Amazon Bedrock (Claude 3 Haiku)
-Numbers on a chart don't stop a riot. When the composite stress score breaches **60/100 (HIGH RISK)**, Jal Sankat automatically invokes **Amazon Bedrock Claude 3 Haiku**.
-
-In under **750 milliseconds**, Bedrock synthesizes localized, military-grade operational instructions:
-1. **Pre-position Tanker Fleets:** *"Dispatch 18 municipal water tankers along Nawab Ganj bypass 24 hours prior to Wednesday peak to preempt residential panic."*
-2. **Cap Commercial Extraction:** *"Throttle private industrial borewell pumping licenses in Ward 2 by 40% between 11:00 AM and 4:00 PM to protect the shared aquifer."*
-3. **Overnight Pressure Balancing:** *"Step down distribution pressure by 15% during off-peak night hours to force recharge into overhead balancing reservoirs."*
-
-### 4. Direct Field Telecom Dispatch: Multi-Carrier SMS
-With one click, Jal Sankat broadcasts bilingual SMS alerts via telecom networks:
-* **English:** *"CRITICAL WATER ALERT: High demand expected starting Wednesday in Nawab Ganj due to heat waves. Please decrease water consumption and store water for 2-3 days."*
-* **Hindi:** *"महत्वपूर्ण जल चेतावनी: लू के कारण बुधवार से नवाब गंज में पानी की भारी कमी हो सकती है। कृपया पानी का उपयोग कम करें और 2-3 दिनों के लिए पानी घर पर स्टोर करें।"*
-
-Field tanker drivers receive coordinates. Ward councilors receive warning notices. Citizens prepare quietly instead of fighting in the streets.
+We asked: "What if the city knew 7 days in advance which neighborhood would run dry, and exactly how many water tankers to send before people even notice?"
 
 ---
 
-## 04. Old World Chaos vs. The Jal Sankat Reality
+## 3. The Solution: How Jal Sankat Works in 4 Simple Steps
 
-| The Old Way (Reactive Chaos) | The Jal Sankat Way (Predictive Foresight) |
-| :--- | :--- |
-| **Sunday:** Heatwave forms in the atmosphere; municipal team has no idea. | **Sunday:** Jal Sankat satellite feed flags Wednesday +3.4°C thermal anomaly; Risk Score spikes to 84 (HIGH). |
-| **Monday:** Taps flow normally; reservoir storage depleted without rationing. | **Monday:** AI prescribes overnight pressure step-down; tanker fleet put on 48-hour standby. |
-| **Tuesday:** Aquifer drawdown accelerates; citizens run air coolers unrestricted. | **Tuesday:** Automated bilingual SMS dispatched to ward leaders; families quietly store water. |
-| **Wednesday:** **Taps run dry.** Panic spreads; emergency lines overwhelmed; water mafias gouge prices. | **Wednesday:** **Zero dry taps.** Pre-positioned tankers arrive on schedule at Nawab Ganj; crisis contained smoothly. |
+We built Jal Sankat (which means "Water Crisis") to give cities a 7-day radar for water:
 
----
+1. Step 1: Sky Watch (Satellites)
+Jal Sankat checks free weather satellites every hour to spot heatwaves coming a full week ahead.
 
-## 05. The Resilient Edge: Why Jal Sankat Never Goes Dark
+2. Step 2: The Math Engine
+It calculates India's official water rule (every person needs 135 liters per day) and multiplies it by heat increases to see how much water each neighborhood will need.
 
-Municipal offices in rural and tier-2 India are notorious for unstable electricity and patchy 2G/3G connectivity. If a storm or grid failure cuts internet access during a heatwave, **a spinning browser loader is unacceptable**.
+3. Step 3: The Smart AI Helper (Amazon Bedrock)
+Instead of confusing charts, Amazon's AI helper writes a simple 3-step action plan in under 1 second:
+* "Send 18 water trucks to Nawab Ganj 24 hours before Wednesday."
+* "Pause non-essential factory pumping in Ward 2 during the hottest afternoon hours."
+* "Lower night pipeline pressure slightly to fill the big overhead water storage tanks."
 
-We engineered an **Autonomous Client-Side Fallback Engine** directly into Jal Sankat’s frontend. If the cloud connection drops a packet, the system doesn't crash—it seamlessly transfers calculation to in-browser execution:
-* Real Open-Meteo satellite weather continues to stream.
-* CPHEEO demand uplift calculations run locally in JavaScript.
-* Ward-level risk rankings and emergency contingency plans compute in memory.
-
-The municipal officer stays in complete control, whether online in a high-tech control center or offline on an emergency laptop in the field.
+4. Step 4: Instant SMS Alerts (Amazon SNS)
+With one click, it sends text messages in Hindi and English directly to water truck drivers and local neighborhood leaders before water pressure dies!
 
 ---
 
-## 06. The Vision: Turning Ticking Clocks into Calm Decisions
+## 4. The Old Way vs. The Jal Sankat Way
 
-In climate-stressed India, **the difference between a humanitarian disaster and a routine logistical operation is 72 hours of notice**.
+* Sunday: Heatwave is coming. 
+  - Old Way: Nobody knows.
+  - Jal Sankat: Radar warns of +3.4°C heatwave; sets Risk to High.
+* Monday:
+  - Old Way: Taps work fine; storage tanks get quietly emptied.
+  - Jal Sankat: AI tells engineers to fill overhead tanks overnight and put trucks on standby.
+* Tuesday:
+  - Old Way: People run coolers; wells dry up silently.
+  - Jal Sankat: SMS alerts sent to neighborhood heads; families quietly store 2 days of water.
+* Wednesday (Peak Heat):
+  - Old Way: Taps run dry. Protests in the streets. People fight over tankers.
+  - Jal Sankat: Zero dry taps. Pre-arranged tankers arrive smoothly. Crisis avoided!
 
-Water is not just a utility; it is the lifeblood of human dignity, public health, and social peace. When municipal teams have the foresight to see a crisis coming 7 days away, the panic evaporates.
+---
 
-Next summer, when the temperature climbs past 40°C in Saharanpur, **the taps will not run dry in silence. Jal Sankat will have warned them first.**`;
+## 5. Built to Never Stop: Works Even Without Internet
+
+In small towns, electricity cuts and bad phone signals happen often during heatwaves. 
+If an emergency worker opens the website and the internet is down, Jal Sankat does not freeze. 
+It has an offline engine built directly into the browser that keeps calculating water needs right on your phone or laptop.
+
+---
+
+## 6. Why This Matters
+
+A water shortage does not have to become a disaster. 
+When a city gets a 72-hour head start, chaos turns into a simple, calm plan.
+
+Next summer, when temperatures pass 40°C in Saharanpur, taps will not run dry in silence. Jal Sankat will have protected them 7 days before.`;
 
   const handleCopyBlog = () => {
-    navigator.clipboard.writeText(blogMarkdown);
+    navigator.clipboard.writeText(plainMarkdown);
     setCopied(true);
     setTimeout(() => setCopied(false), 2500);
   };
@@ -196,8 +170,8 @@ Next summer, when the temperature climbs past 40°C in Saharanpur, **the taps wi
         </button>
 
         <div className="flex items-center gap-2">
-          <span className="hidden md:inline-flex items-center gap-1.5 text-[11px] font-black text-blue-800 bg-blue-50 border border-blue-200 px-2.5 py-1 rounded-full uppercase tracking-wider">
-            <span>💧</span> Ground Reality & Solution Story
+          <span className="hidden md:inline-flex items-center gap-1 text-[11px] font-bold text-cyan-800 bg-cyan-50 border border-cyan-200 px-2.5 py-1 rounded-full">
+            <span>✨</span> Easy Everyday Language Mode
           </span>
 
           <button
@@ -213,101 +187,183 @@ Next summer, when the temperature climbs past 40°C in Saharanpur, **the taps wi
               </>
             ) : (
               <>
-                <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <rect width="14" height="14" x="8" y="8" rx="2" ry="2"/>
                   <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>
                 </svg>
-                <span>Copy Full Markdown</span>
+                <span>Copy Easy Markdown</span>
               </>
             )}
           </button>
         </div>
       </div>
 
+      {/* Reader Tip Banner */}
+      <div className="bg-gradient-to-r from-cyan-50 via-blue-50 to-indigo-50 border border-cyan-200 text-cyan-900 rounded-xl p-2.5 sm:p-3 mb-4 flex items-center gap-2 text-xs font-medium shadow-xs">
+        <span className="text-base shrink-0">👆</span>
+        <span>
+          <strong>Reader Guide:</strong> Any technical word highlighted like{" "}
+          <span className="font-semibold text-cyan-800 bg-cyan-100 border-b-2 border-dotted border-cyan-500 px-1 py-0.5 rounded">
+            this ?
+          </span>{" "}
+          can be <strong>hovered or tapped</strong> to see a simple 1-sentence everyday explanation!
+        </span>
+      </div>
+
       {/* Main Blog Article Container - max-w-full and tight padding */}
-      <article className="w-full max-w-full bg-white/90 backdrop-blur-xl border border-slate-200/90 rounded-2xl p-2 sm:p-4 md:p-6 shadow-xl">
+      <article className="w-full max-w-full bg-white/95 backdrop-blur-xl border border-slate-200/90 rounded-2xl p-3 sm:p-5 md:p-6 shadow-xl">
         
-        {/* Header Metadata & Tags */}
+        {/* Header Tags */}
         <div className="flex flex-wrap items-center gap-1.5 mb-2.5">
           <span className="px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider bg-blue-100 text-blue-800 border border-blue-200">
-            Water Stress Early Warning
+            Real Story & Solution
           </span>
-          <span className="px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider bg-indigo-100 text-indigo-800 border border-indigo-200">
-            Climate Hydrology AI
+          <span className="px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider bg-cyan-100 text-cyan-800 border border-cyan-200">
+            For Everyone To Read
           </span>
-          <span className="px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider bg-emerald-100 text-emerald-800 border border-emerald-200">
-            Amazon Bedrock Claude 3
-          </span>
-          <span className="text-slate-400 text-xs ml-auto font-medium">⏱️ 6 min read • Case Study & Solution Architecture</span>
+          <span className="text-slate-400 text-xs ml-auto font-medium">⏱️ 5 min read • Easy Storytelling</span>
         </div>
 
         {/* Title */}
         <h1 className="text-2xl sm:text-3xl md:text-5xl font-black text-slate-900 tracking-tight leading-tight mb-2">
-          The 72-Hour Warning: <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-600 via-blue-600 to-indigo-600">When India’s Ground Runs Dry</span>
+          The 72-Hour Warning: <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-600 via-blue-600 to-indigo-600">When a City’s Water Runs Out Before Anyone Notices</span>
         </h1>
 
         <p className="text-sm sm:text-base md:text-lg text-slate-600 font-medium leading-relaxed mb-4">
-          *How a silent heatwave nearly paralyzed 705,000 people—and how **Jal Sankat** predicts the crisis 7 days before the first tap runs dry.*
+          *How a silent heatwave nearly left 705,000 people without water—and how **Jal Sankat** gives the city a 7-day head start before taps run dry.*
         </p>
 
-        {/* Hero Suspense Block */}
-        <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-slate-950 via-slate-900 to-blue-950 text-white p-3 sm:p-5 mb-6 shadow-xl border border-slate-800">
-          <div className="absolute top-0 right-0 w-80 h-80 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none"></div>
+        {/* Hero Incident Card */}
+        <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-slate-950 via-slate-900 to-blue-950 text-white p-3.5 sm:p-5 mb-6 shadow-xl border border-slate-800">
+          <div className="absolute top-0 right-0 w-72 h-72 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none"></div>
           
           <div className="flex items-center gap-2 mb-2">
             <span className="inline-block w-2.5 h-2.5 rounded-full bg-red-500 animate-ping"></span>
-            <span className="text-red-400 font-bold uppercase tracking-widest text-[10px]">The Ground Reality • Saharanpur, UP</span>
+            <span className="text-red-400 font-bold uppercase tracking-widest text-[10px]">Real Scenario • Saharanpur City</span>
           </div>
 
           <blockquote className="text-base sm:text-xl md:text-2xl font-serif italic text-slate-100 border-l-4 border-cyan-400 pl-3 my-2 leading-relaxed">
-            “A city does not run out of water on the day it rains. It runs out <strong>72 hours before</strong> anyone realizes the heat curve has crossed the threshold.”
+            “A city does not run out of water on the day it rains. It runs out <strong>72 hours before</strong> anyone realizes the heat has crossed the danger mark.”
           </blockquote>
           
           <div className="flex flex-wrap gap-x-4 gap-y-1 text-[11px] sm:text-xs text-slate-300 mt-2 font-mono">
-            <span>• Population: <strong>705,478</strong></span>
-            <span>• Normal Supply: <strong>90.9 ML/day</strong></span>
-            <span>• Heat Spike: <strong>+3.0°C</strong></span>
-            <span>• Single-Day Deficit: <strong className="text-red-400">14.6 ML/day</strong></span>
+            <span>• People Living Here: <strong>705,478</strong></span>
+            <span>• Regular Daily Supply: <strong>90.9 Million Liters</strong></span>
+            <span>• Heat Increase: <strong>+3.0°C</strong></span>
+            <span>• Sudden Daily Shortage: <strong className="text-red-400">14.6 Million Liters</strong></span>
           </div>
         </div>
 
-        {/* Narrative Section 1: The Problem */}
+        {/* Section 1: The Problem */}
         <section className="space-y-3 mb-6">
           <h2 className="text-lg sm:text-xl md:text-2xl font-extrabold text-slate-900 flex items-center gap-2 border-b border-slate-200 pb-1.5">
-            <span className="text-cyan-600">01.</span> The Sound of Nothing: Anatomy of a Collapse
+            <span className="text-cyan-600">01.</span> The Sound of Nothing: When Taps Start Whistling Air
           </h2>
 
           <p className="text-slate-700 text-xs sm:text-sm md:text-base leading-relaxed">
-            It begins with a sound that every municipal water engineer in India dreads: <em>nothing</em>. No rush of water through the 400mm cast-iron mains. No thrum of centrifugal pumps in the municipal booster station. Just a dry, wheezing gasp of trapped air escaping through a dry brass tap in **Ward 1 (Nawab Ganj)**.
+            It begins with a sound that scares every water officer: <em>nothing</em>. 
+            No gentle splash in the morning bucket. No rush of water in the pipeline. Just a dry, rattling wheeze of trapped air coming out of a brass tap in{" "}
+            <Term 
+              word="Ward 1 (Nawab Ganj)" 
+              explain="A local neighborhood in the city with thousands of homes and small shops."
+              tag="Neighborhood"
+            />.
           </p>
 
           <p className="text-slate-700 text-xs sm:text-sm md:text-base leading-relaxed">
-            By 7:30 AM on a blistering Wednesday, the temperature in **Saharanpur—a bustling city of 705,000 citizens in Western Uttar Pradesh—**has already crossed **38.4°C**. Down in the lanes of Purani Mandi and Sharda Nagar, blue plastic drums line the asphalt in crooked rows. Parents skip work to guard buckets. Private water tankers begin charging exorbitant rates. Furious crowds gather at the Jal Sansthan municipal office demanding answers.
+            By 7:30 AM on a blistering Wednesday, the heat in **Saharanpur (a busy town of 705,000 citizens in Western Uttar Pradesh)** reaches **38.4°C**.
+            Down in the neighborhood lanes, families wake up to an immediate crisis:
           </p>
+
+          <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 sm:p-4 space-y-1.5 text-xs sm:text-sm text-slate-700">
+            <div className="flex items-center gap-2">
+              <span className="text-red-500 font-bold">•</span>
+              <span>Long lines of blue plastic water drums stretch down the road.</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-red-500 font-bold">•</span>
+              <span>Parents miss their work shifts and children miss school just to guard buckets in line.</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-red-500 font-bold">•</span>
+              <span>Private water tankers show up charging ₹1,800 for a single tank of water.</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-red-500 font-bold">•</span>
+              <span>Angry crowds gather outside the water office shouting: <em>"Why did nobody warn us?"</em></span>
+            </div>
+          </div>
 
           <p className="text-slate-700 text-xs sm:text-sm md:text-base leading-relaxed">
-            Yet on Monday morning, the logbook looked peaceful. The reservoir was 85% full. <em>How did a modern Indian city lose 14.6 million liters of water overnight?</em>
+            Yet on Monday morning—just two days earlier—the officer’s logbook had said everything was normal. 
+            <em>How did a modern Indian city lose 14.6 million liters of water overnight without anyone noticing?</em>
+          </p>
+        </section>
+
+        {/* Section 2: The Double Trap */}
+        <section className="space-y-3 mb-6">
+          <h2 className="text-lg sm:text-xl md:text-2xl font-extrabold text-slate-900 flex items-center gap-2 border-b border-slate-200 pb-1.5">
+            <span className="text-cyan-600">02.</span> The Double Trap: Why Heat Silently Breaks City Water
+          </h2>
+
+          <p className="text-slate-700 text-xs sm:text-sm md:text-base leading-relaxed">
+            The city didn't run out of water on Wednesday. Its fate was already sealed on Sunday.
+            When a sudden{" "}
+            <Term 
+              word="Heatwave" 
+              explain="A wave of unusually hot air that stays over a city for days, making everyone use vastly more water."
+              tag="Weather Event"
+            />{" "}
+            hits, two bad things happen at the exact same time:
           </p>
 
-          {/* Minimal Stat Visual Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 my-3">
-            <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 text-center shadow-xs">
-              <span className="block text-[10px] font-bold uppercase tracking-wider text-slate-500">Normal Supply Capacity</span>
-              <span className="text-xl sm:text-2xl font-black text-slate-800">90.9 <span className="text-xs font-semibold text-slate-500">ML/day</span></span>
-              <p className="text-[10px] text-slate-500 mt-0.5">Groundwater derated by 12% stress</p>
-            </div>
-            
-            <div className="bg-red-50 border border-red-200 rounded-xl p-3 text-center shadow-xs">
-              <span className="block text-[10px] font-bold uppercase tracking-wider text-red-600">Heatwave Peak Demand</span>
-              <span className="text-xl sm:text-2xl font-black text-red-600">105.5 <span className="text-xs font-semibold text-red-400">ML/day</span></span>
-              <p className="text-[10px] text-red-500 mt-0.5">+16% surge via domestic coolers</p>
+          {/* Simple Visual Cards for the Two Traps */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 my-3">
+            <div className="bg-red-50/70 border border-red-200 rounded-xl p-3.5">
+              <span className="text-[10px] font-black uppercase tracking-wider text-red-600 block mb-1">
+                Trap #1 • Demand Shoots Up 🚀
+              </span>
+              <h3 className="font-bold text-slate-900 text-sm mb-1">People Need Much More Water</h3>
+              <p className="text-xs text-slate-600 leading-relaxed">
+                As soon as heat crosses 25°C, every house turns on desert coolers (each cooler swallows 40–60 liters a day). People shower twice, wash dusty verandas, and animals drink triple.
+                For every 1°C increase, the whole city needs **+2% more water**.
+              </p>
             </div>
 
-            <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 text-center shadow-xs">
-              <span className="block text-[10px] font-bold uppercase tracking-wider text-amber-700">The 24-Hour Deficit</span>
-              <span className="text-xl sm:text-2xl font-black text-amber-700">14.6 <span className="text-xs font-semibold text-amber-500">ML/day</span></span>
-              <p className="text-[10px] text-amber-600 mt-0.5">Equal to <strong>5,840 water tankers</strong></p>
+            <div className="bg-amber-50/70 border border-amber-200 rounded-xl p-3.5">
+              <span className="text-[10px] font-black uppercase tracking-wider text-amber-700 block mb-1">
+                Trap #2 • Supply Chokes Down 📉
+              </span>
+              <h3 className="font-bold text-slate-900 text-sm mb-1">Underground Wells Start Failing</h3>
+              <p className="text-xs text-slate-600 leading-relaxed">
+                Over 80% of drinking water in cities like Saharanpur comes from deep{" "}
+                <Term 
+                  word="Borewells" 
+                  explain="Deep holes drilled hundreds of feet into the ground to pump up freshwater using electric motors."
+                  tag="Water Source"
+                />.
+                When thousands of motors pump at once, the underground{" "}
+                <Term 
+                  word="Aquifer" 
+                  explain="A natural underground layer of sand and rock that holds water like a giant sponge."
+                  tag="Underground Reservoir"
+                />{" "}
+                drops, so pumps suck up mostly air instead of water.
+              </p>
             </div>
+          </div>
+
+          {/* Stat Comparison */}
+          <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 sm:p-4 my-3 text-center">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 block mb-1">
+              What Does A 14.6 Million Liter Deficit Look Like?
+            </span>
+            <span className="text-2xl sm:text-4xl font-black text-amber-600 block">
+              14,600,000 Liters Missing / Day
+            </span>
+            <p className="text-xs sm:text-sm text-slate-600 mt-1">
+              That is equal to <strong>5,840 big municipal water tanker trucks</strong> disappearing in 24 hours!
+            </p>
           </div>
         </section>
 
@@ -317,152 +373,211 @@ Next summer, when the temperature climbs past 40°C in Saharanpur, **the taps wi
             <span>💡</span> Ground Reality: The 250 Billion Cubic Meter Truth
           </h3>
           <p className="text-xs sm:text-sm text-blue-950 mt-1 leading-relaxed">
-            India extracts <strong>more groundwater than China and the United States combined</strong>—over <em>250 billion cubic meters annually</em>. In non-metro cities, more than <strong>80% of drinking water</strong> depends on an invisible lottery of deep tube wells. When heat spikes by just <strong>+3°C</strong>, domestic demand expands non-linearly while overdrawn borewells suffer hydraulic drawdown. <strong>Demand shoots up exactly as supply collapses.</strong>
+            Did you know? <strong>India pumps out more underground water than the United States and China combined</strong>—over <em>250 billion cubic meters every single year</em>. 
+            Because underground water is invisible beneath our feet, cities don't know it's dropping until taps run dry!
           </p>
         </div>
 
-        {/* Narrative Section 2: The Solution Architecture */}
+        {/* Section 3: The 72-Hour Blind Spot */}
         <section className="space-y-3 mb-6">
           <h2 className="text-lg sm:text-xl md:text-2xl font-extrabold text-slate-900 flex items-center gap-2 border-b border-slate-200 pb-1.5">
-            <span className="text-cyan-600">02.</span> The Solution: Jal Sankat’s 7-Day Foresight Engine
+            <span className="text-cyan-600">03.</span> The 72-Hour Blind Spot: Why Nobody Knew
           </h2>
 
           <p className="text-slate-700 text-xs sm:text-sm md:text-base leading-relaxed">
-            We asked a fundamental question: <em>What if a city could see its water crisis 7 days before it struck?</em>
+            Why do our towns suffer this panic every single summer?
+            Because municipal water departments are forced to operate in the **blind rear-view mirror**.
           </p>
 
           <p className="text-slate-700 text-xs sm:text-sm md:text-base leading-relaxed">
-            We engineered **Jal Sankat (जल संकट)** as an operational early-warning defense platform that transforms passive weather data into actionable, ward-level municipal defense:
+            They wait for someone to call the complaint hotline. But by the time a citizen calls:
           </p>
+          <ul className="list-disc list-inside text-xs sm:text-sm text-slate-700 space-y-1 ml-2">
+            <li>The underground wells are already depleted.</li>
+            <li>The giant overhead concrete storage tanks are already empty.</li>
+            <li>The nearest spare water trucks are still 36 hours away.</li>
+          </ul>
 
-          {/* Minimal Pipeline Diagram */}
-          <div className="bg-slate-900 text-slate-200 rounded-xl p-3 sm:p-4 overflow-x-auto border border-slate-800 my-3 font-mono text-[11px] sm:text-xs">
-            <div className="text-cyan-400 font-bold mb-2">// JAL SANKAT 7-DAY AUTONOMOUS PIPELINE</div>
-            <div className="space-y-1.5">
-              <div className="flex items-center gap-2">
-                <span className="px-1.5 py-0.5 bg-blue-900/70 text-blue-300 rounded border border-blue-700 font-semibold">1. Satellite Weather</span>
-                <span>──► Open-Meteo API (7-day predictive heat anomaly curves)</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="px-1.5 py-0.5 bg-indigo-900/70 text-indigo-300 rounded border border-indigo-700 font-semibold">2. CPHEEO Model</span>
-                <span>──► 135 LPCD benchmark + dynamic +2%/°C thermal uplift</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="px-1.5 py-0.5 bg-purple-900/70 text-purple-300 rounded border border-purple-700 font-semibold">3. AI Commander</span>
-                <span>──► Amazon Bedrock Claude 3 Haiku (synthesizes triage plan in &lt;800ms)</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="px-1.5 py-0.5 bg-emerald-900/70 text-emerald-300 rounded border border-emerald-700 font-semibold">4. Field Telecom</span>
-                <span>──► Amazon SNS (Multi-carrier Hindi & English SMS to tanker drivers)</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="px-1.5 py-0.5 bg-cyan-900/70 text-cyan-300 rounded border border-cyan-700 font-semibold">5. Resilient Edge</span>
-                <span>──► Client-Side Autonomous Fallback (Zero downtime even if offline)</span>
-              </div>
-            </div>
-          </div>
-
-          <h3 className="text-sm sm:text-base font-bold text-slate-800 mt-3">
-            Why Generative AI (Amazon Bedrock Claude 3) Is Essential
-          </h3>
-          <p className="text-slate-700 text-xs sm:text-sm md:text-base leading-relaxed">
-            Rule engines only spit out generic platitudes like <em>"Please conserve water"</em>. But when a crisis hits, a municipal engineer needs <strong>concrete logistics</strong>.
+          <p className="text-slate-700 text-xs sm:text-sm md:text-base leading-relaxed font-semibold">
+            We asked: <em>What if the city had a 7-day weather radar for water, warning officers before a single bucket goes empty?</em>
           </p>
+        </section>
+
+        {/* Section 4: The Solution (Jal Sankat) */}
+        <section className="space-y-3 mb-6">
+          <h2 className="text-lg sm:text-xl md:text-2xl font-extrabold text-slate-900 flex items-center gap-2 border-b border-slate-200 pb-1.5">
+            <span className="text-cyan-600">04.</span> The Solution: How Jal Sankat Works in 4 Easy Steps
+          </h2>
 
           <p className="text-slate-700 text-xs sm:text-sm md:text-base leading-relaxed">
-            When Jal Sankat detects a risk score exceeding **60/100 (HIGH RISK)**, it calls **Amazon Bedrock Claude 3 Haiku**. Within **750 milliseconds**, Bedrock evaluates ward demographics and delivers a surgical response:
+            To stop this crisis, we built **Jal Sankat (जल संकट)**. It is an early-warning defense system that acts like a 24/7 radar for city water:
           </p>
 
-          <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 sm:p-4 space-y-2">
-            <div className="flex items-start gap-2 text-xs sm:text-sm text-slate-800 font-medium">
-              <span className="text-cyan-600 font-bold shrink-0">1.</span>
-              <span><strong>Pre-emptive Tanker Rationing:</strong> Pre-position 18 municipal water tankers along Nawab Ganj bypass 24 hours prior to Wednesday peak.</span>
+          {/* The 4 Steps in Plain Cards */}
+          <div className="space-y-2.5 my-3">
+            <div className="bg-white border border-slate-200 rounded-xl p-3 shadow-xs flex items-start gap-3">
+              <span className="w-7 h-7 rounded-lg bg-blue-100 text-blue-800 font-black flex items-center justify-center shrink-0 text-xs">
+                1
+              </span>
+              <div>
+                <h4 className="font-bold text-slate-800 text-xs sm:text-sm">
+                  Eye in the Sky (Weather Satellites)
+                </h4>
+                <p className="text-xs text-slate-600 mt-0.5 leading-relaxed">
+                  Every hour, Jal Sankat checks free weather satellites (via{" "}
+                  <Term 
+                    word="Open-Meteo" 
+                    explain="A free global weather service that provides live temperature and wind forecasts from satellite data."
+                    tag="Weather Data"
+                  />
+                  ) to spot heatwaves coming a full 7 days ahead.
+                </p>
+              </div>
             </div>
-            <div className="flex items-start gap-2 text-xs sm:text-sm text-slate-800 font-medium">
-              <span className="text-cyan-600 font-bold shrink-0">2.</span>
-              <span><strong>Groundwater Extraction Caps:</strong> Throttle commercial extraction licenses in Ward 2 by 40% between 11:00 AM and 4:00 PM to protect the aquifer table.</span>
+
+            <div className="bg-white border border-slate-200 rounded-xl p-3 shadow-xs flex items-start gap-3">
+              <span className="w-7 h-7 rounded-lg bg-indigo-100 text-indigo-800 font-black flex items-center justify-center shrink-0 text-xs">
+                2
+              </span>
+              <div>
+                <h4 className="font-bold text-slate-800 text-xs sm:text-sm">
+                  The Neighborhood Calculator
+                </h4>
+                <p className="text-xs text-slate-600 mt-0.5 leading-relaxed">
+                  It uses India's official{" "}
+                  <Term 
+                    word="CPHEEO Rule" 
+                    explain="Government of India guidelines stating every urban citizen needs at least 135 liters of clean water daily for drinking, cooking, and hygiene."
+                    tag="Water Rule"
+                  />{" "}
+                  (135 liters per person per day) and multiplies it by the heat forecast to pinpoint the exact neighborhood that will run short first.
+                </p>
+              </div>
             </div>
-            <div className="flex items-start gap-2 text-xs sm:text-sm text-slate-800 font-medium">
-              <span className="text-cyan-600 font-bold shrink-0">3.</span>
-              <span><strong>Overnight Pressure Regulation:</strong> Step down distribution pressure by 15% during off-peak night hours to force recharge into overhead reservoirs.</span>
+
+            <div className="bg-white border border-slate-200 rounded-xl p-3 shadow-xs flex items-start gap-3">
+              <span className="w-7 h-7 rounded-lg bg-purple-100 text-purple-800 font-black flex items-center justify-center shrink-0 text-xs">
+                3
+              </span>
+              <div>
+                <h4 className="font-bold text-slate-800 text-xs sm:text-sm">
+                  The Smart AI Rescue Planner
+                </h4>
+                <p className="text-xs text-slate-600 mt-0.5 leading-relaxed">
+                  Instead of confusing charts, Amazon's AI (
+                  <Term 
+                    word="Amazon Bedrock Claude 3" 
+                    explain="A smart artificial intelligence brain made by Amazon that reads the crisis data and writes an emergency action plan in under 1 second."
+                    tag="AI Brain"
+                  />
+                  ) writes a simple, 3-point plan in under 1 second:
+                  <em> "Send 18 water trucks to Ward 1 on Tuesday; fill overhead tanks at night; pause factory pumping during peak afternoon hours."</em>
+                </p>
+              </div>
+            </div>
+
+            <div className="bg-white border border-slate-200 rounded-xl p-3 shadow-xs flex items-start gap-3">
+              <span className="w-7 h-7 rounded-lg bg-emerald-100 text-emerald-800 font-black flex items-center justify-center shrink-0 text-xs">
+                4
+              </span>
+              <div>
+                <h4 className="font-bold text-slate-800 text-xs sm:text-sm">
+                  Instant SMS to Drivers and Leaders
+                </h4>
+                <p className="text-xs text-slate-600 mt-0.5 leading-relaxed">
+                  Using{" "}
+                  <Term 
+                    word="Amazon SNS" 
+                    explain="Amazon's high-speed phone messaging service that sends urgent SMS texts to thousands of numbers at the same time."
+                    tag="SMS Service"
+                  />
+                  , the system automatically sends text messages in both Hindi and English directly to tanker drivers and neighborhood councilors before water pressure drops!
+                </p>
+              </div>
             </div>
           </div>
         </section>
 
-        {/* Narrative Section 3: Old Way vs Jal Sankat Way */}
+        {/* Section 5: The Comparison Table */}
         <section className="space-y-3 mb-6">
           <h2 className="text-lg sm:text-xl md:text-2xl font-extrabold text-slate-900 flex items-center gap-2 border-b border-slate-200 pb-1.5">
-            <span className="text-cyan-600">03.</span> The Comparison: Reactive Chaos vs. Predictive Foresight
+            <span className="text-cyan-600">05.</span> The Difference: Panic vs. Calm Preparation
           </h2>
 
-          <div className="overflow-x-auto my-3">
+          <div className="overflow-x-auto my-2">
             <table className="w-full text-left text-xs sm:text-sm border-collapse">
               <thead>
                 <tr className="border-b border-slate-200 bg-slate-100/70">
-                  <th className="p-2 sm:p-3 font-bold text-slate-600 w-24">Timeline</th>
-                  <th className="p-2 sm:p-3 font-bold text-red-600">The Old Way (Reactive Chaos)</th>
-                  <th className="p-2 sm:p-3 font-bold text-cyan-700">The Jal Sankat Way (Predictive Foresight)</th>
+                  <th className="p-2 sm:p-2.5 font-bold text-slate-600 w-20">Day</th>
+                  <th className="p-2 sm:p-2.5 font-bold text-red-600">The Old Way (Panic & Protests)</th>
+                  <th className="p-2 sm:p-2.5 font-bold text-cyan-700">The Jal Sankat Way (Prepared & Calm)</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
                 <tr>
-                  <td className="p-2 sm:p-3 font-bold text-slate-700">Sunday</td>
-                  <td className="p-2 sm:p-3 text-slate-600">Heatwave forms in the atmosphere; municipal engineers have zero awareness.</td>
-                  <td className="p-2 sm:p-3 text-slate-800 font-medium bg-cyan-50/40">Satellite telemetry flags +3.4°C thermal anomaly; Risk Score jumps to 84 (HIGH).</td>
+                  <td className="p-2 sm:p-2.5 font-bold text-slate-700">Sunday</td>
+                  <td className="p-2 sm:p-2.5 text-slate-600">Heatwave is coming; nobody in the city has any idea.</td>
+                  <td className="p-2 sm:p-2.5 text-slate-800 font-medium bg-cyan-50/40">Radar spots the heatwave; alerts engineers that risk will reach High on Wednesday.</td>
                 </tr>
                 <tr>
-                  <td className="p-2 sm:p-3 font-bold text-slate-700">Monday</td>
-                  <td className="p-2 sm:p-3 text-slate-600">Taps flow normally; overhead reserves are depleted without rationing.</td>
-                  <td className="p-2 sm:p-3 text-slate-800 font-medium bg-cyan-50/40">AI prescribes overnight pressure balancing; tanker fleets placed on 48-hour standby.</td>
+                  <td className="p-2 sm:p-2.5 font-bold text-slate-700">Monday</td>
+                  <td className="p-2 sm:p-2.5 text-slate-600">Taps still work normally; overhead storage tanks are drained without rationing.</td>
+                  <td className="p-2 sm:p-2.5 text-slate-800 font-medium bg-cyan-50/40">AI recommends filling overhead tanks overnight and putting tanker trucks on standby.</td>
                 </tr>
                 <tr>
-                  <td className="p-2 sm:p-3 font-bold text-slate-700">Tuesday</td>
-                  <td className="p-2 sm:p-3 text-slate-600">Aquifer drawdown accelerates; air coolers run unrestricted.</td>
-                  <td className="p-2 sm:p-3 text-slate-800 font-medium bg-cyan-50/40">Automated bilingual SMS dispatched to ward leaders; families quietly store water.</td>
+                  <td className="p-2 sm:p-2.5 font-bold text-slate-700">Tuesday</td>
+                  <td className="p-2 sm:p-2.5 text-slate-600">Underground wells start dropping; coolers run full blast.</td>
+                  <td className="p-2 sm:p-2.5 text-slate-800 font-medium bg-cyan-50/40">SMS sent to local councilors; families quietly store water in advance.</td>
                 </tr>
                 <tr>
-                  <td className="p-2 sm:p-3 font-bold text-slate-700">Wednesday</td>
-                  <td className="p-2 sm:p-3 text-red-600 font-semibold"><strong>Taps run dry.</strong> Civil unrest begins; emergency lines crash; water mafias gouge prices.</td>
-                  <td className="p-2 sm:p-3 text-emerald-700 font-semibold bg-emerald-50/40"><strong>Zero dry taps.</strong> Pre-positioned tankers arrive on schedule at Nawab Ganj; crisis contained smoothly.</td>
+                  <td className="p-2 sm:p-2.5 font-bold text-slate-700">Wednesday</td>
+                  <td className="p-2 sm:p-2.5 text-red-600 font-semibold"><strong>Taps run dry.</strong> Crowds shout outside municipal gates; black-market water prices spike.</td>
+                  <td className="p-2 sm:p-2.5 text-emerald-700 font-semibold bg-emerald-50/40"><strong>Zero dry taps.</strong> Pre-positioned tankers arrive on time in Nawab Ganj; everyone has water.</td>
                 </tr>
               </tbody>
             </table>
           </div>
         </section>
 
-        {/* Narrative Section 4: Edge Resilience */}
+        {/* Section 6: Works Offline */}
         <section className="space-y-3 mb-6">
           <h2 className="text-lg sm:text-xl md:text-2xl font-extrabold text-slate-900 flex items-center gap-2 border-b border-slate-200 pb-1.5">
-            <span className="text-cyan-600">04.</span> Resilient By Design: Why It Never Goes Dark
+            <span className="text-cyan-600">06.</span> Built for Real Life: Works Even Without Internet
           </h2>
 
           <p className="text-slate-700 text-xs sm:text-sm md:text-base leading-relaxed">
-            In rural Indian municipalities, power cuts and unstable 2G/3G connectivity are everyday realities. During a heatwave, a spinning browser loader could mean 10,000 families going thirsty.
+            In Indian towns, electricity cuts and weak 2G phone signals happen frequently during extreme summer heat.
+            If a water officer opens the system during a power cut, a spinning loading icon could leave thousands of families without drinking water.
           </p>
 
           <p className="text-slate-700 text-xs sm:text-sm md:text-base leading-relaxed">
-            We built Jal Sankat with an **Autonomous Client-Side Fallback Engine**. If the cloud backend drops a heartbeat, the system shifts execution directly into client-side JavaScript:
-            live Open-Meteo satellite weather streams, CPHEEO demand uplift calculations run locally, and contingency triage generates in milliseconds.
+            We built Jal Sankat with a{" "}
+            <Term 
+              word="Offline Fallback Mode" 
+              explain="Special code that lets the app keep calculating water numbers inside your laptop or phone even if the server drops connection."
+              tag="Offline Feature"
+            />
+            . Even if the cloud goes offline, the website keeps computing water demand right inside the officer's browser without crashing.
           </p>
         </section>
 
         {/* Conclusion */}
         <section className="space-y-3 mb-6 bg-slate-50 border border-slate-200 rounded-xl p-4 sm:p-5">
           <h2 className="text-base sm:text-lg md:text-xl font-extrabold text-slate-900">
-            The Vision: Turning Ticking Clocks into Calm Decisions
+            The Big Vision: Turning Panic Into Simple Plans
           </h2>
 
           <p className="text-slate-700 text-xs sm:text-sm md:text-base leading-relaxed">
-            Water crises in climate-stressed India are not inevitable acts of fate; they are **information lag failures**.
+            Water crises in India are not inevitable curses of nature. They happen because cities find out too late.
           </p>
 
           <p className="text-slate-700 text-xs sm:text-sm md:text-base leading-relaxed">
-            When municipal engineers gain **72 hours of foresight**, a catastrophe becomes a managed logistical plan. 
-            Tankers arrive on schedule. Aquifers are protected from irreversible thermal drawdown. Families get their water with peace and dignity.
+            When municipal officers gain **72 hours of advance notice**, a humanitarian disaster turns into a calm, orderly plan.
+            Water trucks arrive on time. Underground wells are saved from drying out. Families get clean water with peace and dignity.
           </p>
 
           <p className="text-slate-900 font-bold text-xs sm:text-sm md:text-base">
-            *Next time the heat climbs past 40°C in Saharanpur, the taps will not run dry in silence. Jal Sankat will have warned them first.*
+            *Next summer, when temperatures cross 40°C in Saharanpur, taps will not run dry in silence. Jal Sankat will have protected them 7 days before.*
           </p>
         </section>
 
@@ -474,7 +589,7 @@ Next summer, when the temperature climbs past 40°C in Saharanpur, **the taps wi
             </div>
             <div>
               <h4 className="text-xs sm:text-sm font-bold text-slate-800">Jal Sankat (जल संकट)</h4>
-              <p className="text-[11px] text-slate-500">Autonomous Water Stress Early Warning System</p>
+              <p className="text-[11px] text-slate-500">Water Stress Early Warning System</p>
             </div>
           </div>
 
@@ -482,7 +597,7 @@ Next summer, when the temperature climbs past 40°C in Saharanpur, **the taps wi
             onClick={handleCopyBlog}
             className="w-full sm:w-auto px-4 py-2 rounded-lg bg-slate-900 hover:bg-slate-800 text-white text-xs sm:text-sm font-bold shadow-md transition-all flex items-center justify-center gap-2"
           >
-            {copied ? "✓ Copied to Clipboard!" : "📋 Copy Markdown Article"}
+            {copied ? "✓ Copied Easy Markdown!" : "📋 Copy Easy Markdown"}
           </button>
         </div>
 
