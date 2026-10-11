@@ -45,6 +45,26 @@ def test_scoring_math_offline_fallback():
     if data["source"] == "offline-sample":
         assert data["peak_temp"] == 38
         # Baseline demand = 705478 * 135 / 1e6 = 95.23953
-        # Max temp 38 is 8 degrees above 30 -> 8 * 0.02 = 0.16 extra
-        # Peak demand = 95.23953 * 1.16 = 110.477 -> rounded to 110.5
-        assert data["demand"] == 110.5
+        # Max temp 38 is 13 degrees above 25 -> 13 * 0.02 = 0.26 extra
+        # Peak demand = 95.23953 * 1.26 = 120.0018 -> rounded to 120.0
+        assert data["demand"] == 120.0
+
+def test_admin_auth_gate():
+    # 1. Invalid login fails
+    bad_res = client.post("/api/admin/login", json={"username": "admin", "password": "wrongpassword"})
+    assert bad_res.status_code == 401
+
+    # 2. Valid login succeeds and returns token
+    login_res = client.post("/api/admin/login", json={"username": "admin", "password": "admin123"})
+    assert login_res.status_code == 200
+    token = login_res.json()["token"]
+    assert token
+
+    # 3. Unauthenticated write fails
+    unauth_res = client.post("/api/config", json={"LPCD": 135})
+    assert unauth_res.status_code == 401
+
+    # 4. Authenticated verify succeeds
+    verify_res = client.get("/api/admin/verify", headers={"Authorization": f"Bearer {token}"})
+    assert verify_res.status_code == 200
+    assert verify_res.json()["authenticated"] is True

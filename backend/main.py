@@ -1,10 +1,8 @@
-"""Jal Sankat: city water-stress early warning API (FastAPI)."""
-import json, pathlib, datetime as dt
+import json, pathlib, datetime as dt, hmac, hashlib, time, os
 import httpx
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Header
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-import os
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -16,15 +14,73 @@ CONFIG_PATH = pathlib.Path(__file__).parent / "data" / "config.json"
 
 CITIES = json.loads(CITIES_PATH.read_text(encoding="utf-8"))
 
+# Authentication Gate Configuration
+ADMIN_USER = os.getenv("ADMIN_USER", "admin")
+ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "admin123")
+AUTH_SECRET = os.getenv("AUTH_SECRET", "jal-sankat-auth-secret-key-2026")
+
+def generate_token(username: str) -> str:
+    timestamp = str(int(time.time()))
+    signature = hmac.new(AUTH_SECRET.encode(), f"{username}:{timestamp}".encode(), hashlib.sha256).hexdigest()
+    return f"{username}.{timestamp}.{signature}"
+
+def is_valid_token(token: str) -> bool:
+    try:
+        parts = token.split(".")
+        if len(parts) != 3:
+            return False
+        username, timestamp, signature = parts
+        if username != ADMIN_USER:
+            return False
+        # Valid for 24 hours (86400 seconds)
+        if time.time() - int(timestamp) > 86400:
+            return False
+        expected_sig = hmac.new(AUTH_SECRET.encode(), f"{username}:{timestamp}".encode(), hashlib.sha256).hexdigest()
+        return hmac.compare_digest(signature, expected_sig)
+    except Exception:
+        return False
+
+def verify_admin_auth(authorization: str = None):
+    if not authorization:
+        raise HTTPException(status_code=401, detail="Authentication required. Please log in.")
+    token = authorization.replace("Bearer ", "").strip()
+    if not is_valid_token(token):
+        raise HTTPException(status_code=401, detail="Invalid or expired session. Please log in again.")
+    return True
+
+class LoginRequest(BaseModel):
+    username: str
+    password: str
+
+@app.post("/api/admin/login")
+def admin_login(req: LoginRequest):
+    if req.username == ADMIN_USER and req.password == ADMIN_PASSWORD:
+        token = generate_token(req.username)
+        return {"status": "success", "token": token, "username": req.username}
+    raise HTTPException(status_code=401, detail="Invalid username or password")
+
+@app.get("/api/admin/verify")
+def verify_admin(authorization: str = Header(None)):
+    if not authorization:
+        raise HTTPException(status_code=401, detail="Missing authorization header")
+    token = authorization.replace("Bearer ", "").strip()
+    if is_valid_token(token):
+        return {"authenticated": True, "username": ADMIN_USER}
+    raise HTTPException(status_code=401, detail="Invalid or expired session")
+
 def get_config():
     if not CONFIG_PATH.exists():
         CONFIG_PATH.write_text(json.dumps({
             "LPCD": 135,
+            "BASE_TEMP": 25,
             "HEAT_UPLIFT": 0.02,
             "GW_DERATE": 0.0015,
             "W": {"heat": 0.25, "gap": 0.30, "ratio": 0.25, "gw": 0.20}
         }))
-    return json.loads(CONFIG_PATH.read_text(encoding="utf-8"))
+    cfg = json.loads(CONFIG_PATH.read_text(encoding="utf-8"))
+    if "BASE_TEMP" not in cfg:
+        cfg["BASE_TEMP"] = 25
+    return cfg
 
 async def get_forecast(c):
     try:
@@ -55,12 +111,14 @@ def raw_cities():
     return CITIES
 
 @app.post("/api/config")
-def update_config(new_config: dict):
+def update_config(new_config: dict, authorization: str = Header(None)):
+    verify_admin_auth(authorization)
     CONFIG_PATH.write_text(json.dumps(new_config, indent=4))
     return {"status": "success"}
 
 @app.post("/api/cities/update")
-def update_city(city_data: dict):
+def update_city(city_data: dict, authorization: str = Header(None)):
+    verify_admin_auth(authorization)
     city_name = city_data.get("name")
     if not city_name:
         raise HTTPException(400, "City name required")
@@ -78,6 +136,7 @@ async def assess(city: str, heat_shift: float = 0):
     
     cfg = get_config()
     LPCD = cfg["LPCD"]
+    BASE_TEMP = cfg.get("BASE_TEMP", 25)
     HEAT_UPLIFT = cfg["HEAT_UPLIFT"]
     GW_DERATE = cfg["GW_DERATE"]
     W = cfg["W"]
@@ -85,12 +144,12 @@ async def assess(city: str, heat_shift: float = 0):
     dates, temps, source = await get_forecast(c)
     temps = [round(t + heat_shift, 1) for t in temps]
     base = c["pop"] * LPCD / 1e6  # ML/day
-    dem = [base * (1 + HEAT_UPLIFT * max(0, t - 30)) for t in temps]
+    dem = [base * (1 + HEAT_UPLIFT * max(0, t - BASE_TEMP)) for t in temps]
     pk = dem.index(max(dem))
     supply = c["supply"] * (1 - GW_DERATE * c["gw_score"])
     gap = max(0, dem[pk] - supply)
     comp = dict(
-        heat=min(100, max(0, (temps[pk] - 30) * 10)),
+        heat=min(100, max(0, (temps[pk] - BASE_TEMP) * 5)),
         gap=min(100, gap / dem[pk] * 400),
         ratio=min(100, max(0, (dem[pk] / supply - 0.8) * 250)),
         gw=c["gw_score"])
@@ -116,8 +175,9 @@ async def assess(city: str, heat_shift: float = 0):
         sms_en = f"Water alert: high demand expected on {day} in {worst}. Please store water and avoid wastage."
         sms_hi = f"जल चेतावनी: {day} को {worst} में पानी की मांग अधिक रहेगी। कृपया पानी जमा करें और बर्बादी रोकें।"
 
-    return dict(city=city, level=lvl, score=score, source=source, peak_day=day,
+    return dict(city=city, level=lvl, score=score, source=source, peak_day=day, peak_date=dates[pk],
         peak_temp=temps[pk], demand=round(dem[pk], 1), supply=round(supply, 1), gap=round(gap, 1), gw=c["gw"],
+        base_temp=BASE_TEMP,
         components={k: round(v) for k, v in comp.items()}, weights=W,
         days=[dict(date=d, temp=t, demand=round(x, 1)) for d, t, x in zip(dates, temps, dem)],
         wards=wards, worst_ward=worst, actions=actions,

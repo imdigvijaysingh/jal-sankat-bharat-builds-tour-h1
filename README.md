@@ -23,7 +23,7 @@ We do **not** survey people. We use public data, simple maths, and clear labels.
 - **Heat What-if Slider**: Test a heatwave scenario instantly and watch the entire dashboard recalculate.
 - **Honesty Table**: Every number is transparently tagged Measured, Official, Estimated, or Predicted.
 - **(i) Context Buttons**: Hover over them on any section for plain-English explanations.
-- **Live Data Admin Panel**: Edit city data and tune mathematical model weights directly from the website dashboard.
+- **Live Data Admin Panel & Authentication Gate**: Secure municipal login gate protecting model weights, city parameters, and ward demographics (Default credentials: `admin` / `admin123`).
 
 ## How to run on your computer
 You need Python 3.10+ and Node.js 18+.
@@ -52,11 +52,11 @@ Open the link shown (usually http://localhost:5173). If there is no internet, th
 - `frontend/src/AdminPanel.jsx`: the UI to input real data.
 
 ## The model (and its assumptions)
-- Demand = population x 135 litres x (1 + 2% per degree above 30°C)
+- Demand = population x 135 litres x (1 + 2% per degree above base temperature, default 25°C)
 - Supply = official capacity, reduced 0.15% per groundwater stress point
 - Score = 25% heat + 30% supply gap + 25% demand/supply ratio + 20% groundwater
 
-The 2%, 0.15% and weights are **assumptions**. You can tune them with real historical data **directly via the Admin Data button** on the website. This is a rules-based model, not machine learning yet.
+The 25°C base temperature, 2% heat uplift, 0.15% groundwater derate, and weights are **configurable assumptions**. You can tune them **directly via the Admin Data button** on the website. This is a rules-based model, not machine learning yet.
 
 ## Honest limits (and how to fix them)
 - Population, supply, groundwater and ward shares are placeholders. **Fix:** Click the "Admin Data" button on the website to input real figures from the Census, city water department and CGWB.
@@ -64,11 +64,13 @@ The 2%, 0.15% and weights are **assumptions**. You can tune them with real histo
 - Only 4 cities are included initially (you can add more to `cities.json`).
 
 ## API
+- `POST /api/admin/login`: authenticate admin with username & password
+- `GET /api/admin/verify`: verify active admin session token
 - `GET /api/cities`: list of cities
 - `GET /api/assess/{city}?heat_shift=0`: full assessment
 - `GET /api/cities/raw`: raw data for all cities
-- `POST /api/cities/update`: overwrite data for a city
-- `GET /api/config` and `POST /api/config`: read and update model constants
+- `POST /api/cities/update`: overwrite data for a city (requires Auth)
+- `GET /api/config` and `POST /api/config`: read and update model constants (POST requires Auth)
 
 ## Hosting
 Localhost is enough for submission. If you want it online later, Render can host both parts (the free tier sleeps when idle).
