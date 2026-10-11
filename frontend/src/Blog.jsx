@@ -15,7 +15,7 @@ function Reveal({ children, delay = 0, className = "" }) {
           }
         });
       },
-      { threshold: 0.08, rootMargin: "0px 0px -40px 0px" }
+      { threshold: 0.08, rootMargin: "0px 0px -30px 0px" }
     );
 
     const current = domRef.current;
@@ -31,13 +31,13 @@ function Reveal({ children, delay = 0, className = "" }) {
       ref={domRef}
       style={{
         transitionDelay: `${delay}ms`,
-        transitionDuration: "750ms",
+        transitionDuration: "650ms",
         transitionTimingFunction: "cubic-bezier(0.16, 1, 0.3, 1)"
       }}
       className={`transition-all transform will-change-transform ${
         isVisible
           ? "opacity-100 translate-y-0 filter-none"
-          : "opacity-0 translate-y-6 blur-[0.8px]"
+          : "opacity-0 translate-y-4 blur-[0.6px]"
       } ${className}`}
     >
       {children}
@@ -58,16 +58,16 @@ function Term({ word, explain, tag = "Simple Meaning" }) {
       const screenWidth = window.innerWidth;
       
       // Horizontal alignment: detect proximity to edges
-      if (rect.left < 180) {
+      if (rect.left < 160) {
         setAlign("left");
-      } else if (screenWidth - rect.right < 180) {
+      } else if (screenWidth - rect.right < 160) {
         setAlign("right");
       } else {
         setAlign("center");
       }
 
       // Vertical alignment: if too close to top of viewport, open downwards
-      if (rect.top < 150) {
+      if (rect.top < 140) {
         setIsTop(true);
       } else {
         setIsTop(false);
@@ -98,13 +98,13 @@ function Term({ word, explain, tag = "Simple Meaning" }) {
   let arrowXClasses = "left-1/2 -translate-x-1/2";
   if (align === "left") {
     alignClasses = "left-0 translate-x-0";
-    arrowXClasses = "left-5";
+    arrowXClasses = "left-4";
   } else if (align === "right") {
     alignClasses = "right-0 left-auto translate-x-0";
-    arrowXClasses = "right-5";
+    arrowXClasses = "right-4";
   }
 
-  const verticalClasses = isTop ? "top-full mt-2.5" : "bottom-full mb-2.5";
+  const verticalClasses = isTop ? "top-full mt-2" : "bottom-full mb-2";
   const arrowYClasses = isTop 
     ? "bottom-full -mb-1 border-t-transparent border-b-slate-900" 
     : "top-full -mt-1 border-b-transparent border-t-slate-900";
@@ -112,28 +112,28 @@ function Term({ word, explain, tag = "Simple Meaning" }) {
   return (
     <span 
       ref={spanRef}
-      className="relative inline-block cursor-help group mx-1 align-baseline"
+      className="relative inline-block cursor-help group mx-0.5 align-baseline"
       onMouseEnter={handleOpen}
       onMouseLeave={handleClose}
       onClick={toggle}
     >
-      <span className="font-bold text-cyan-900 bg-cyan-100/80 hover:bg-cyan-200/90 border-b-2 border-dotted border-cyan-600 px-2 py-0.5 rounded-md transition-all inline-flex items-center gap-1.5 shadow-xs text-base sm:text-lg">
+      <span className="font-semibold text-cyan-900 bg-cyan-100/70 hover:bg-cyan-200/80 border-b border-dotted border-cyan-600 px-1.5 py-0.5 rounded transition-all inline-flex items-center gap-1 shadow-xs text-sm">
         <span>{word}</span>
-        <span className="text-xs text-cyan-700 bg-white/90 rounded-full w-4 h-4 inline-flex items-center justify-center font-black shadow-xs">?</span>
+        <span className="text-xs text-cyan-700 bg-white/90 rounded-full w-4 h-4 inline-flex items-center justify-center font-bold">?</span>
       </span>
 
-      {/* Floating Popover Card - Large readable text */}
+      {/* Floating Popover Card */}
       <span 
         role="tooltip"
-        className={`pointer-events-none transition-all duration-200 absolute z-50 ${verticalClasses} ${alignClasses} w-72 sm:w-80 max-w-[calc(100vw-2rem)] p-3.5 sm:p-4 rounded-xl bg-slate-900/95 text-white shadow-2xl backdrop-blur-md border border-slate-700 leading-relaxed font-sans ${
+        className={`pointer-events-none transition-all duration-200 absolute z-50 ${verticalClasses} ${alignClasses} w-72 max-w-[calc(100vw-2rem)] p-3 rounded-xl bg-slate-900/95 text-white shadow-2xl backdrop-blur-md border border-slate-700 leading-relaxed font-sans ${
           active ? "opacity-100 scale-100" : "opacity-0 scale-95 pointer-events-none"
         }`}
       >
-        <span className="flex items-center justify-between text-xs font-black uppercase tracking-wider text-cyan-300 pb-1.5 mb-1.5 border-b border-slate-700">
+        <span className="flex items-center justify-between text-sm font-bold uppercase tracking-wider text-cyan-300 pb-1 mb-1 border-b border-slate-700">
           <span>💡 {tag}</span>
-          <span className="text-slate-400 font-mono text-[11px]">{word}</span>
+          <span className="text-slate-400 font-mono text-sm">{word}</span>
         </span>
-        <span className="text-slate-100 block text-sm sm:text-base leading-relaxed font-medium">
+        <span className="text-slate-200 block text-sm leading-normal font-normal">
           {explain}
         </span>
         <span className={`absolute ${arrowYClasses} ${arrowXClasses} border-4 border-transparent`}></span>
@@ -143,7 +143,6 @@ function Term({ word, explain, tag = "Simple Meaning" }) {
 }
 
 export default function Blog({ onBackToDashboard }) {
-  const [copied, setCopied] = useState(false);
   const [scrollPercent, setScrollPercent] = useState(0);
 
   // Reading Progress Bar
@@ -267,70 +266,36 @@ When a city gets a 72-hour head start, chaos turns into a simple, calm plan.
 
 Next summer, when temperatures pass 40°C in Saharanpur, taps will not run dry in silence. Jal Sankat will have protected them 7 days before.`;
 
-  const handleCopyBlog = () => {
-    navigator.clipboard.writeText(plainMarkdown);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2500);
-  };
-
   return (
-    <div className="w-full max-w-full text-slate-800 font-sans selection:bg-cyan-200 selection:text-cyan-900 pb-20">
+    <div className="w-full max-w-full text-slate-800 font-sans selection:bg-cyan-200 selection:text-cyan-900 pb-16">
       
       {/* Top Floating Action Bar with Integrated Reading Progress */}
-      <div className="sticky top-2 z-40 bg-white/95 backdrop-blur-md border border-slate-200 shadow-md rounded-xl p-2.5 sm:p-3 mb-4 flex items-center justify-between gap-3 overflow-hidden relative">
+      <div className="sticky top-2 z-40 bg-white/95 backdrop-blur-md border border-slate-200 shadow-md rounded-xl p-2 sm:p-2.5 mb-3 flex items-center justify-between gap-2 overflow-hidden relative">
         
         {/* Subtle Reading Progress Bar */}
         <div 
-          className="absolute bottom-0 left-0 h-[3px] bg-gradient-to-r from-cyan-500 via-blue-500 to-indigo-600 transition-all duration-150 ease-out"
+          className="absolute bottom-0 left-0 h-[2.5px] bg-gradient-to-r from-cyan-500 via-blue-500 to-indigo-600 transition-all duration-150 ease-out"
           style={{ width: `${scrollPercent}%` }}
         />
 
         <button
           onClick={onBackToDashboard}
-          className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-sm sm:text-base transition-all shadow-xs"
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-sm transition-all shadow-xs"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 sm:w-5 sm:h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <path d="m15 18-6-6 6-6"/>
           </svg>
           Back to Live Dashboard
         </button>
-
-        <div className="flex items-center gap-2.5">
-          <span className="hidden md:inline-flex items-center gap-1.5 text-xs sm:text-sm font-bold text-cyan-900 bg-cyan-100/70 border border-cyan-200 px-3 py-1 rounded-full">
-            <span>✨</span> Easy Everyday Language Mode
-          </span>
-
-          <button
-            onClick={handleCopyBlog}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-cyan-600 via-blue-600 to-indigo-600 hover:from-cyan-500 hover:to-indigo-500 text-white font-bold text-xs sm:text-sm shadow-sm transition-all"
-          >
-            {copied ? (
-              <>
-                <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 text-emerald-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <polyline points="20 6 9 17 4 12"/>
-                </svg>
-                <span>Copied Article!</span>
-              </>
-            ) : (
-              <>
-                <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <rect width="14" height="14" x="8" y="8" rx="2" ry="2"/>
-                  <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>
-                </svg>
-                <span>Copy Easy Markdown</span>
-              </>
-            )}
-          </button>
-        </div>
       </div>
 
       {/* Reader Tip Banner */}
       <Reveal delay={30}>
-        <div className="bg-gradient-to-r from-cyan-50 via-blue-50 to-indigo-50 border border-cyan-200 text-cyan-950 rounded-xl p-3 sm:p-4 mb-6 flex items-center gap-3 text-sm sm:text-base font-medium shadow-xs">
-          <span className="text-xl shrink-0">👆</span>
+        <div className="bg-gradient-to-r from-cyan-50 via-blue-50 to-indigo-50 border border-cyan-200 text-cyan-950 rounded-xl p-2.5 sm:p-3 mb-4 flex items-center gap-2.5 text-sm font-medium shadow-xs">
+          <span className="text-base shrink-0">👆</span>
           <span>
             <strong>Reader Guide:</strong> Any technical word highlighted like{" "}
-            <span className="font-bold text-cyan-900 bg-cyan-200/80 border-b-2 border-dotted border-cyan-600 px-1.5 py-0.5 rounded">
+            <span className="font-semibold text-cyan-900 bg-cyan-200/80 border-b border-dotted border-cyan-600 px-1 py-0.5 rounded text-sm">
               this ?
             </span>{" "}
             can be <strong>hovered or tapped</strong> to see a simple 1-sentence everyday explanation!
@@ -338,64 +303,64 @@ Next summer, when temperatures pass 40°C in Saharanpur, taps will not run dry i
         </div>
       </Reveal>
 
-      {/* Main Blog Article Container - max-w-full with comfortable padding */}
-      <article className="w-full max-w-full bg-white/95 backdrop-blur-xl border border-slate-200/90 rounded-2xl p-4 sm:p-7 md:p-10 shadow-xl space-y-6 sm:space-y-8">
+      {/* Main Blog Article Container - max-w-full */}
+      <article className="w-full max-w-full bg-white/95 backdrop-blur-xl border border-slate-200/90 rounded-2xl p-4 sm:p-6 md:p-8 shadow-xl space-y-5 sm:space-y-6">
         
         {/* Header Tags */}
-        <Reveal delay={60}>
-          <div className="flex flex-wrap items-center gap-2 mb-3">
-            <span className="px-3 py-1 rounded-md text-xs sm:text-sm font-black uppercase tracking-wider bg-blue-100 text-blue-900 border border-blue-200">
+        <Reveal delay={50}>
+          <div className="flex flex-wrap items-center gap-2 mb-2">
+            <span className="px-2.5 py-0.5 rounded text-sm font-bold uppercase tracking-wider bg-blue-100 text-blue-900 border border-blue-200">
               Real Story & Solution
             </span>
-            <span className="px-3 py-1 rounded-md text-xs sm:text-sm font-black uppercase tracking-wider bg-cyan-100 text-cyan-900 border border-cyan-200">
-              For Everyone To Read
+            <span className="px-2.5 py-0.5 rounded text-sm font-bold uppercase tracking-wider bg-cyan-100 text-cyan-900 border border-cyan-200">
+              For Everyone
             </span>
-            <span className="text-slate-500 text-xs sm:text-sm ml-auto font-medium">⏱️ 5 min read • Easy Storytelling</span>
+            <span className="text-slate-500 text-sm ml-auto font-medium">⏱️ 5 min read • Easy Storytelling</span>
           </div>
         </Reveal>
 
-        {/* Title */}
-        <Reveal delay={90}>
-          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-slate-900 tracking-tight leading-[1.15] mb-3">
+        {/* Title: max font size lg */}
+        <Reveal delay={80}>
+          <h1 className="text-lg sm:text-lg font-black text-slate-900 tracking-tight leading-snug mb-1">
             The 72-Hour Warning: <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-600 via-blue-600 to-indigo-600">When a City’s Water Runs Out Before Anyone Notices</span>
           </h1>
 
-          <p className="text-lg sm:text-xl md:text-2xl text-slate-600 font-medium leading-relaxed">
+          <p className="text-sm sm:text-base text-slate-600 font-medium leading-relaxed">
             *How a silent heatwave nearly left 705,000 people without water—and how <strong className="text-slate-800 font-bold">Jal Sankat</strong> gives the city a 7-day head start before taps run dry.*
           </p>
         </Reveal>
 
         {/* Hero Incident Card */}
-        <Reveal delay={120}>
-          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-slate-950 via-slate-900 to-blue-950 text-white p-5 sm:p-8 my-4 shadow-xl border border-slate-800">
-            <div className="absolute top-0 right-0 w-80 h-80 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none"></div>
+        <Reveal delay={100}>
+          <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-slate-950 via-slate-900 to-blue-950 text-white p-4 sm:p-5 my-3 shadow-lg border border-slate-800">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none"></div>
             
-            <div className="flex items-center gap-2.5 mb-3">
-              <span className="inline-block w-3 h-3 rounded-full bg-red-500 animate-ping"></span>
-              <span className="text-red-400 font-bold uppercase tracking-widest text-xs sm:text-sm">Real Scenario • Saharanpur City</span>
+            <div className="flex items-center gap-2 mb-2">
+              <span className="inline-block w-2.5 h-2.5 rounded-full bg-red-500 animate-ping"></span>
+              <span className="text-red-400 font-bold uppercase tracking-wider text-sm">Real Scenario • Saharanpur City</span>
             </div>
 
-            <blockquote className="text-xl sm:text-2xl md:text-3xl font-serif italic text-slate-100 border-l-4 border-cyan-400 pl-4 sm:pl-6 my-4 leading-relaxed">
+            <blockquote className="text-sm sm:text-base font-serif italic text-slate-100 border-l-4 border-cyan-400 pl-3 my-2 leading-relaxed">
               “A city does not run out of water on the day it rains. It runs out <strong>72 hours before</strong> anyone realizes the heat has crossed the danger mark.”
             </blockquote>
             
-            <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm sm:text-base text-slate-300 mt-4 font-mono">
-              <span>• People Living Here: <strong className="text-white">705,478</strong></span>
-              <span>• Regular Daily Supply: <strong className="text-white">90.9 Million Liters</strong></span>
-              <span>• Heat Increase: <strong className="text-amber-400">+3.0°C</strong></span>
-              <span>• Sudden Daily Shortage: <strong className="text-red-400">14.6 Million Liters</strong></span>
+            <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-slate-300 mt-2 font-mono">
+              <span>• People: <strong className="text-white">705,478</strong></span>
+              <span>• Daily Supply: <strong className="text-white">90.9 ML/day</strong></span>
+              <span>• Heat Jump: <strong className="text-amber-400">+3.0°C</strong></span>
+              <span>• Daily Shortage: <strong className="text-red-400">14.6 ML/day</strong></span>
             </div>
           </div>
         </Reveal>
 
         {/* Section 1: The Problem */}
-        <section className="space-y-4 pt-2">
-          <Reveal delay={70}>
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-slate-900 flex items-center gap-3 border-b border-slate-200 pb-2">
+        <section className="space-y-3 pt-1">
+          <Reveal delay={60}>
+            <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2 border-b border-slate-200 pb-1.5">
               <span className="text-cyan-600">01.</span> The Sound of Nothing: When Taps Start Whistling Air
             </h2>
 
-            <p className="text-base sm:text-lg md:text-xl text-slate-700 leading-relaxed mt-3">
+            <p className="text-sm sm:text-base text-slate-700 leading-relaxed mt-2">
               It begins with a sound that scares every water officer: <em>nothing</em>. 
               No gentle splash in the morning bucket. No rush of water in the pipeline. Just a dry, rattling wheeze of trapped air coming out of a brass tap in{" "}
               <Term 
@@ -405,48 +370,50 @@ Next summer, when temperatures pass 40°C in Saharanpur, taps will not run dry i
               />.
             </p>
 
-            <p className="text-base sm:text-lg md:text-xl text-slate-700 leading-relaxed">
+            <p className="text-sm sm:text-base text-slate-700 leading-relaxed">
               By 7:30 AM on a blistering Wednesday, the heat in <strong>Saharanpur (a busy town of 705,000 citizens in Western Uttar Pradesh)</strong> reaches <strong>38.4°C</strong>.
               Down in the neighborhood lanes, families wake up to an immediate crisis:
             </p>
           </Reveal>
 
-          <Reveal delay={120}>
-            <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 sm:p-6 space-y-2.5 text-base sm:text-lg text-slate-700 my-4 shadow-xs">
-              <div className="flex items-start gap-3">
-                <span className="text-red-500 font-bold text-xl leading-none">•</span>
+          <Reveal delay={90}>
+            <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 sm:p-4 space-y-1.5 text-sm sm:text-base text-slate-700 my-2 shadow-xs">
+              <div className="flex items-start gap-2.5">
+                <span className="text-red-500 font-bold">•</span>
                 <span>Long lines of blue plastic water drums stretch down the road.</span>
               </div>
-              <div className="flex items-start gap-3">
-                <span className="text-red-500 font-bold text-xl leading-none">•</span>
+              <div className="flex items-start gap-2.5">
+                <span className="text-red-500 font-bold">•</span>
                 <span>Parents miss their work shifts and children miss school just to guard buckets in line.</span>
               </div>
-              <div className="flex items-start gap-3">
-                <span className="text-red-500 font-bold text-xl leading-none">•</span>
+              <div className="flex items-start gap-2.5">
+                <span className="text-red-500 font-bold">•</span>
                 <span>Private water tankers show up charging ₹1,800 for a single tank of water.</span>
               </div>
-              <div className="flex items-start gap-3">
-                <span className="text-red-500 font-bold text-xl leading-none">•</span>
+              <div className="flex items-start gap-2.5">
+                <span className="text-red-500 font-bold">•</span>
                 <span>Angry crowds gather outside the water office shouting: <em>"Why did nobody warn us?"</em></span>
               </div>
             </div>
 
-            <Reveal delay={100}>
-              <figure className="my-5 rounded-2xl overflow-hidden border border-slate-200 shadow-md bg-slate-900 group">
+            {/* Image 1: Compact Viewport Friendly */}
+            <div className="max-w-xl mx-auto my-3" style={{ maxWidth: "620px" }}>
+              <figure className="rounded-xl overflow-hidden border border-slate-200 shadow-md bg-slate-900 group">
                 <img 
                   src="/images/dry_tap_crisis.jpg" 
                   alt="Dry brass water tap in Indian municipality during summer heatwave" 
-                  className="w-full h-auto max-h-[480px] object-cover object-center group-hover:scale-[1.01] transition-transform duration-500" 
+                  className="w-full object-cover object-center group-hover:scale-[1.01] transition-transform duration-300 block" 
+                  style={{ height: "250px", maxHeight: "250px", width: "100%", objectFit: "cover" }}
                   loading="lazy"
                 />
-                <figcaption className="p-3.5 sm:p-4 text-xs sm:text-sm text-slate-300 bg-slate-900/95 backdrop-blur-md flex items-center justify-between gap-3 border-t border-slate-800">
-                  <span><strong>Ground Reality:</strong> Empty brass tap in an Indian municipal district during peak 38°C heat, with plastic drums lined along the street.</span>
-                  <span className="text-xs text-cyan-400 font-mono shrink-0 font-bold">FIG 1.0</span>
+                <figcaption className="p-2.5 text-sm text-slate-300 bg-slate-900/95 flex items-center justify-between gap-2 border-t border-slate-800">
+                  <span><strong>Ground Reality:</strong> Empty brass tap in Saharanpur during 38°C heatwave, with drums lined along the street.</span>
+                  <span className="text-sm text-cyan-400 font-mono shrink-0 font-bold">FIG 1.0</span>
                 </figcaption>
               </figure>
-            </Reveal>
+            </div>
 
-            <p className="text-base sm:text-lg md:text-xl text-slate-700 leading-relaxed mt-3">
+            <p className="text-sm sm:text-base text-slate-700 leading-relaxed mt-2">
               Yet on Monday morning—just two days earlier—the officer’s logbook had said everything was normal. 
               <em>How did a modern Indian city lose 14.6 million liters of water overnight without anyone noticing?</em>
             </p>
@@ -454,13 +421,13 @@ Next summer, when temperatures pass 40°C in Saharanpur, taps will not run dry i
         </section>
 
         {/* Section 2: The Double Trap */}
-        <section className="space-y-4 pt-2">
-          <Reveal delay={70}>
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-slate-900 flex items-center gap-3 border-b border-slate-200 pb-2">
+        <section className="space-y-3 pt-1">
+          <Reveal delay={60}>
+            <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2 border-b border-slate-200 pb-1.5">
               <span className="text-cyan-600">02.</span> The Double Trap: Why Heat Silently Breaks City Water
             </h2>
 
-            <p className="text-base sm:text-lg md:text-xl text-slate-700 leading-relaxed mt-3">
+            <p className="text-sm sm:text-base text-slate-700 leading-relaxed mt-2">
               The city didn't run out of water on Wednesday. Its fate was already sealed on Sunday.
               When a sudden{" "}
               <Term 
@@ -473,27 +440,27 @@ Next summer, when temperatures pass 40°C in Saharanpur, taps will not run dry i
           </Reveal>
 
           {/* Simple Visual Cards for the Two Traps */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 my-4">
-            <Reveal delay={100}>
-              <div className="bg-red-50/80 border border-red-200 rounded-2xl p-5 sm:p-6 h-full shadow-xs">
-                <span className="text-xs sm:text-sm font-black uppercase tracking-wider text-red-600 block mb-1.5">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 my-2">
+            <Reveal delay={80}>
+              <div className="bg-red-50/80 border border-red-200 rounded-xl p-3.5 sm:p-4 h-full shadow-xs">
+                <span className="text-sm font-bold uppercase tracking-wider text-red-600 block mb-1">
                   Trap #1 • Demand Shoots Up 🚀
                 </span>
-                <h3 className="font-extrabold text-slate-900 text-lg sm:text-xl mb-2">People Need Much More Water</h3>
-                <p className="text-sm sm:text-base text-slate-700 leading-relaxed">
+                <h3 className="font-bold text-slate-900 text-base mb-1">People Need Much More Water</h3>
+                <p className="text-sm text-slate-700 leading-relaxed">
                   As soon as heat crosses 25°C, every house turns on desert coolers (each cooler swallows 40–60 liters a day). People shower twice, wash dusty verandas, and animals drink triple.
                   For every 1°C increase, the whole city needs <strong>+2% more water</strong>.
                 </p>
               </div>
             </Reveal>
 
-            <Reveal delay={140}>
-              <div className="bg-amber-50/80 border border-amber-200 rounded-2xl p-5 sm:p-6 h-full shadow-xs">
-                <span className="text-xs sm:text-sm font-black uppercase tracking-wider text-amber-700 block mb-1.5">
+            <Reveal delay={110}>
+              <div className="bg-amber-50/80 border border-amber-200 rounded-xl p-3.5 sm:p-4 h-full shadow-xs">
+                <span className="text-sm font-bold uppercase tracking-wider text-amber-700 block mb-1">
                   Trap #2 • Supply Chokes Down 📉
                 </span>
-                <h3 className="font-extrabold text-slate-900 text-lg sm:text-xl mb-2">Underground Wells Start Failing</h3>
-                <p className="text-sm sm:text-base text-slate-700 leading-relaxed">
+                <h3 className="font-bold text-slate-900 text-base mb-1">Underground Wells Start Failing</h3>
+                <p className="text-sm text-slate-700 leading-relaxed">
                   Over 80% of drinking water in cities like Saharanpur comes from deep{" "}
                   <Term 
                     word="Borewells" 
@@ -512,31 +479,35 @@ Next summer, when temperatures pass 40°C in Saharanpur, taps will not run dry i
             </Reveal>
           </div>
 
-          <Reveal delay={100}>
-            <figure className="my-5 rounded-2xl overflow-hidden border border-slate-200 shadow-md bg-slate-900 group">
-              <img 
-                src="/images/groundwater_depletion.jpg" 
-                alt="3D geological diagram of groundwater aquifer depletion beneath city" 
-                className="w-full h-auto max-h-[480px] object-cover object-center group-hover:scale-[1.01] transition-transform duration-500" 
-                loading="lazy"
-              />
-              <figcaption className="p-3.5 sm:p-4 text-xs sm:text-sm text-slate-300 bg-slate-900/95 backdrop-blur-md flex items-center justify-between gap-3 border-t border-slate-800">
-                <span><strong>The Double Trap:</strong> 3D architectural cutaway showing urban thermal heat dome expanding domestic consumption while deep borewells pull subterranean water tables down.</span>
-                <span className="text-xs text-cyan-400 font-mono shrink-0 font-bold">FIG 2.0</span>
-              </figcaption>
-            </figure>
+          {/* Image 2: Compact Viewport Friendly */}
+          <Reveal delay={90}>
+            <div className="max-w-xl mx-auto my-3" style={{ maxWidth: "620px" }}>
+              <figure className="rounded-xl overflow-hidden border border-slate-200 shadow-md bg-slate-900 group">
+                <img 
+                  src="/images/groundwater_depletion.jpg" 
+                  alt="3D geological diagram of groundwater aquifer depletion beneath city" 
+                  className="w-full object-cover object-center group-hover:scale-[1.01] transition-transform duration-300 block" 
+                  style={{ height: "250px", maxHeight: "250px", width: "100%", objectFit: "cover" }}
+                  loading="lazy"
+                />
+                <figcaption className="p-2.5 text-sm text-slate-300 bg-slate-900/95 flex items-center justify-between gap-2 border-t border-slate-800">
+                  <span><strong>The Double Trap:</strong> 3D cutaway showing urban heat dome (+3°C) expanding consumption while borewells drop aquifer tables.</span>
+                  <span className="text-sm text-cyan-400 font-mono shrink-0 font-bold">FIG 2.0</span>
+                </figcaption>
+              </figure>
+            </div>
           </Reveal>
 
           {/* Stat Comparison */}
-          <Reveal delay={110}>
-            <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5 sm:p-8 my-4 text-center shadow-xs">
-              <span className="text-xs sm:text-sm font-black uppercase tracking-wider text-slate-500 block mb-2">
+          <Reveal delay={100}>
+            <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 sm:p-5 my-2 text-center shadow-xs">
+              <span className="text-sm font-bold uppercase tracking-wider text-slate-500 block mb-1">
                 What Does A 14.6 Million Liter Deficit Look Like?
               </span>
-              <span className="text-3xl sm:text-5xl md:text-6xl font-black text-amber-600 block my-1">
+              <span className="text-base sm:text-lg font-bold text-amber-600 block my-1">
                 14,600,000 Liters Missing / Day
               </span>
-              <p className="text-base sm:text-lg md:text-xl text-slate-700 mt-2 font-medium">
+              <p className="text-sm sm:text-base text-slate-700 font-medium">
                 That is equal to <strong>5,840 big municipal water tanker trucks</strong> disappearing in 24 hours!
               </p>
             </div>
@@ -544,12 +515,12 @@ Next summer, when temperatures pass 40°C in Saharanpur, taps will not run dry i
         </section>
 
         {/* Fact Callout Box */}
-        <Reveal delay={80}>
-          <div className="bg-gradient-to-r from-blue-50 via-cyan-50 to-indigo-50 border-l-4 border-blue-600 p-4 sm:p-6 rounded-r-2xl my-6 shadow-xs">
-            <h3 className="font-black text-blue-900 text-sm sm:text-base uppercase tracking-wider flex items-center gap-2">
-              <span className="text-lg">💡</span> Ground Reality: The 250 Billion Cubic Meter Truth
+        <Reveal delay={70}>
+          <div className="bg-gradient-to-r from-blue-50 via-cyan-50 to-indigo-50 border-l-4 border-blue-600 p-3.5 sm:p-4 rounded-r-xl my-3 shadow-xs">
+            <h3 className="font-bold text-blue-900 text-sm uppercase tracking-wider flex items-center gap-1.5">
+              <span>💡</span> Ground Reality: The 250 Billion Cubic Meter Truth
             </h3>
-            <p className="text-base sm:text-lg text-blue-950 mt-2 leading-relaxed">
+            <p className="text-sm sm:text-base text-blue-950 mt-1 leading-relaxed">
               Did you know? <strong>India pumps out more underground water than the United States and China combined</strong>—over <em>250 billion cubic meters every single year</em>. 
               Because underground water is invisible beneath our feet, cities don't know it's dropping until taps run dry!
             </p>
@@ -557,69 +528,73 @@ Next summer, when temperatures pass 40°C in Saharanpur, taps will not run dry i
         </Reveal>
 
         {/* Section 3: The 72-Hour Blind Spot */}
-        <section className="space-y-4 pt-2">
-          <Reveal delay={70}>
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-slate-900 flex items-center gap-3 border-b border-slate-200 pb-2">
+        <section className="space-y-3 pt-1">
+          <Reveal delay={60}>
+            <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2 border-b border-slate-200 pb-1.5">
               <span className="text-cyan-600">03.</span> The 72-Hour Blind Spot: Why Nobody Knew
             </h2>
 
-            <p className="text-base sm:text-lg md:text-xl text-slate-700 leading-relaxed mt-3">
+            <p className="text-sm sm:text-base text-slate-700 leading-relaxed mt-2">
               Why do our towns suffer this panic every single summer?
               Because municipal water departments are forced to operate in the <strong>blind rear-view mirror</strong>.
             </p>
 
-            <p className="text-base sm:text-lg md:text-xl text-slate-700 leading-relaxed">
+            <p className="text-sm sm:text-base text-slate-700 leading-relaxed">
               They wait for someone to call the complaint hotline. But by the time a citizen calls:
             </p>
-            <ul className="list-disc list-inside text-base sm:text-lg text-slate-700 space-y-1.5 ml-3">
+            <ul className="list-disc list-inside text-sm sm:text-base text-slate-700 space-y-1 ml-2">
               <li>The underground wells are already depleted.</li>
               <li>The giant overhead concrete storage tanks are already empty.</li>
               <li>The nearest spare water trucks are still 36 hours away.</li>
             </ul>
 
-            <p className="text-base sm:text-lg md:text-xl text-slate-800 leading-relaxed font-semibold mt-3">
+            <p className="text-sm sm:text-base text-slate-800 leading-relaxed font-semibold mt-2">
               We asked: <em>What if the city had a 7-day weather radar for water, warning officers before a single bucket goes empty?</em>
             </p>
           </Reveal>
         </section>
 
         {/* Section 4: The Solution (Jal Sankat) */}
-        <section className="space-y-4 pt-2">
-          <Reveal delay={70}>
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-slate-900 flex items-center gap-3 border-b border-slate-200 pb-2">
+        <section className="space-y-3 pt-1">
+          <Reveal delay={60}>
+            <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2 border-b border-slate-200 pb-1.5">
               <span className="text-cyan-600">04.</span> The Solution: How Jal Sankat Works in 4 Easy Steps
             </h2>
 
-            <p className="text-base sm:text-lg md:text-xl text-slate-700 leading-relaxed mt-3">
+            <p className="text-sm sm:text-base text-slate-700 leading-relaxed mt-2">
               To stop this crisis, we built <strong>Jal Sankat (जल संकट)</strong>. It is an early-warning defense system that acts like a 24/7 radar for city water:
             </p>
 
-            <figure className="my-5 rounded-2xl overflow-hidden border border-slate-200 shadow-md bg-slate-900 group">
-              <img 
-                src="/images/satellite_ai_defense.jpg" 
-                alt="Spaceborne climate satellite scanning thermal anomalies over India with AWS AI" 
-                className="w-full h-auto max-h-[480px] object-cover object-center group-hover:scale-[1.01] transition-transform duration-500" 
-                loading="lazy"
-              />
-              <figcaption className="p-3.5 sm:p-4 text-xs sm:text-sm text-slate-300 bg-slate-900/95 backdrop-blur-md flex items-center justify-between gap-3 border-t border-slate-800">
-                <span><strong>Spaceborne Early Warning:</strong> Satellite thermal scans detect incoming heat domes over Northern India 7 days in advance, analyzed by Amazon Bedrock AI.</span>
-                <span className="text-xs text-cyan-400 font-mono shrink-0 font-bold">FIG 3.0</span>
-              </figcaption>
-            </figure>
+            {/* Image 3: Compact Viewport Friendly */}
+            <div className="max-w-xl mx-auto my-3" style={{ maxWidth: "620px" }}>
+              <figure className="rounded-xl overflow-hidden border border-slate-200 shadow-md bg-slate-900 group">
+                <img 
+                  src="/images/satellite_ai_defense.jpg" 
+                  alt="Spaceborne climate satellite scanning thermal anomalies over India with AWS AI" 
+                  className="w-full object-cover object-center group-hover:scale-[1.01] transition-transform duration-300 block" 
+                  style={{ height: "250px", maxHeight: "250px", width: "100%", objectFit: "cover" }}
+                  loading="lazy"
+                />
+                <figcaption className="p-2.5 text-sm text-slate-300 bg-slate-900/95 flex items-center justify-between gap-2 border-t border-slate-800">
+                  <span><strong>Spaceborne Early Warning:</strong> Satellite thermal scans detect incoming heat domes over Northern India 7 days in advance, analyzed by Amazon Bedrock AI.</span>
+                  <span className="text-sm text-cyan-400 font-mono shrink-0 font-bold">FIG 3.0</span>
+                </figcaption>
+              </figure>
+            </div>
           </Reveal>
 
           {/* The 4 Steps in Plain Cards */}
-          <div className="space-y-3.5 my-4">
-            <Reveal delay={90}>
-              <div className="bg-white border border-slate-200 rounded-2xl p-4 sm:p-6 shadow-xs flex items-start gap-4 hover:border-blue-300 transition-colors">
-                <span className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-blue-100 text-blue-800 font-black flex items-center justify-center shrink-0 text-base sm:text-lg">
+          <div className="space-y-2.5 my-3">
+            <Reveal delay={70}>
+              <div className="bg-white border border-slate-200 rounded-xl p-3 sm:p-3.5 shadow-xs flex items-start gap-3 hover:border-blue-300 transition-colors">
+                <span className="w-8 h-8 rounded-lg bg-blue-100 text-blue-800 font-bold flex items-center justify-center shrink-0 text-sm">
                   1
                 </span>
                 <div>
-                  <h4 className="font-extrabold text-slate-900 text-base sm:text-lg">
+                  <h4 className="font-bold text-slate-900 text-base">
                     Eye in the Sky (Weather Satellites)
                   </h4>
-                  <p className="text-sm sm:text-base text-slate-600 mt-1 leading-relaxed">
+                  <p className="text-sm text-slate-600 mt-0.5 leading-relaxed">
                     Every hour, Jal Sankat checks free weather satellites (via{" "}
                     <Term 
                       word="Open-Meteo" 
@@ -632,16 +607,16 @@ Next summer, when temperatures pass 40°C in Saharanpur, taps will not run dry i
               </div>
             </Reveal>
 
-            <Reveal delay={120}>
-              <div className="bg-white border border-slate-200 rounded-2xl p-4 sm:p-6 shadow-xs flex items-start gap-4 hover:border-indigo-300 transition-colors">
-                <span className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-indigo-100 text-indigo-800 font-black flex items-center justify-center shrink-0 text-base sm:text-lg">
+            <Reveal delay={90}>
+              <div className="bg-white border border-slate-200 rounded-xl p-3 sm:p-3.5 shadow-xs flex items-start gap-3 hover:border-indigo-300 transition-colors">
+                <span className="w-8 h-8 rounded-lg bg-indigo-100 text-indigo-800 font-bold flex items-center justify-center shrink-0 text-sm">
                   2
                 </span>
                 <div>
-                  <h4 className="font-extrabold text-slate-900 text-base sm:text-lg">
+                  <h4 className="font-bold text-slate-900 text-base">
                     The Neighborhood Calculator
                   </h4>
-                  <p className="text-sm sm:text-base text-slate-600 mt-1 leading-relaxed">
+                  <p className="text-sm text-slate-600 mt-0.5 leading-relaxed">
                     It uses India's official{" "}
                     <Term 
                       word="CPHEEO Rule" 
@@ -654,16 +629,16 @@ Next summer, when temperatures pass 40°C in Saharanpur, taps will not run dry i
               </div>
             </Reveal>
 
-            <Reveal delay={150}>
-              <div className="bg-white border border-slate-200 rounded-2xl p-4 sm:p-6 shadow-xs flex items-start gap-4 hover:border-purple-300 transition-colors">
-                <span className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-purple-100 text-purple-800 font-black flex items-center justify-center shrink-0 text-base sm:text-lg">
+            <Reveal delay={110}>
+              <div className="bg-white border border-slate-200 rounded-xl p-3 sm:p-3.5 shadow-xs flex items-start gap-3 hover:border-purple-300 transition-colors">
+                <span className="w-8 h-8 rounded-lg bg-purple-100 text-purple-800 font-bold flex items-center justify-center shrink-0 text-sm">
                   3
                 </span>
                 <div>
-                  <h4 className="font-extrabold text-slate-900 text-base sm:text-lg">
+                  <h4 className="font-bold text-slate-900 text-base">
                     The Smart AI Rescue Planner
                   </h4>
-                  <p className="text-sm sm:text-base text-slate-600 mt-1 leading-relaxed">
+                  <p className="text-sm text-slate-600 mt-0.5 leading-relaxed">
                     Instead of confusing charts, Amazon's AI (
                     <Term 
                       word="Amazon Bedrock Claude 3" 
@@ -677,16 +652,16 @@ Next summer, when temperatures pass 40°C in Saharanpur, taps will not run dry i
               </div>
             </Reveal>
 
-            <Reveal delay={180}>
-              <div className="bg-white border border-slate-200 rounded-2xl p-4 sm:p-6 shadow-xs flex items-start gap-4 hover:border-emerald-300 transition-colors">
-                <span className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-emerald-100 text-emerald-800 font-black flex items-center justify-center shrink-0 text-base sm:text-lg">
+            <Reveal delay={130}>
+              <div className="bg-white border border-slate-200 rounded-xl p-3 sm:p-3.5 shadow-xs flex items-start gap-3 hover:border-emerald-300 transition-colors">
+                <span className="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-800 font-bold flex items-center justify-center shrink-0 text-sm">
                   4
                 </span>
                 <div>
-                  <h4 className="font-extrabold text-slate-900 text-base sm:text-lg">
+                  <h4 className="font-bold text-slate-900 text-base">
                     Instant SMS to Drivers and Leaders
                   </h4>
-                  <p className="text-sm sm:text-base text-slate-600 mt-1 leading-relaxed">
+                  <p className="text-sm text-slate-600 mt-0.5 leading-relaxed">
                     Using{" "}
                     <Term 
                       word="Amazon SNS" 
@@ -702,41 +677,41 @@ Next summer, when temperatures pass 40°C in Saharanpur, taps will not run dry i
         </section>
 
         {/* Section 5: The Comparison Table */}
-        <section className="space-y-4 pt-2">
-          <Reveal delay={70}>
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-slate-900 flex items-center gap-3 border-b border-slate-200 pb-2">
+        <section className="space-y-3 pt-1">
+          <Reveal delay={60}>
+            <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2 border-b border-slate-200 pb-1.5">
               <span className="text-cyan-600">05.</span> The Difference: Panic vs. Calm Preparation
             </h2>
 
-            <div className="overflow-x-auto my-3 border border-slate-200 rounded-2xl shadow-xs">
-              <table className="w-full text-left text-sm sm:text-base border-collapse">
+            <div className="overflow-x-auto my-2 border border-slate-200 rounded-xl shadow-xs">
+              <table className="w-full text-left text-sm border-collapse">
                 <thead>
                   <tr className="border-b border-slate-200 bg-slate-100/80">
-                    <th className="p-3 sm:p-4 font-bold text-slate-700 w-28 sm:w-36 text-sm sm:text-base">Day</th>
-                    <th className="p-3 sm:p-4 font-bold text-red-600 text-sm sm:text-base">The Old Way (Panic & Protests)</th>
-                    <th className="p-3 sm:p-4 font-bold text-cyan-800 text-sm sm:text-base">The Jal Sankat Way (Prepared & Calm)</th>
+                    <th className="p-2.5 sm:p-3 font-bold text-slate-700 w-24 text-sm">Day</th>
+                    <th className="p-2.5 sm:p-3 font-bold text-red-600 text-sm">The Old Way (Panic & Protests)</th>
+                    <th className="p-2.5 sm:p-3 font-bold text-cyan-800 text-sm">The Jal Sankat Way (Prepared & Calm)</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
                   <tr className="hover:bg-slate-50/50 transition-colors">
-                    <td className="p-3 sm:p-4 font-extrabold text-slate-800">Sunday</td>
-                    <td className="p-3 sm:p-4 text-slate-600">Heatwave is coming; nobody in the city has any idea.</td>
-                    <td className="p-3 sm:p-4 text-slate-900 font-semibold bg-cyan-50/40">Radar spots the heatwave; alerts engineers that risk will reach High on Wednesday.</td>
+                    <td className="p-2.5 sm:p-3 font-bold text-slate-800">Sunday</td>
+                    <td className="p-2.5 sm:p-3 text-slate-600">Heatwave is coming; nobody in the city has any idea.</td>
+                    <td className="p-2.5 sm:p-3 text-slate-900 font-semibold bg-cyan-50/40">Radar spots the heatwave; alerts engineers that risk will reach High on Wednesday.</td>
                   </tr>
                   <tr className="hover:bg-slate-50/50 transition-colors">
-                    <td className="p-3 sm:p-4 font-extrabold text-slate-800">Monday</td>
-                    <td className="p-3 sm:p-4 text-slate-600">Taps still work normally; overhead storage tanks are drained without rationing.</td>
-                    <td className="p-3 sm:p-4 text-slate-900 font-semibold bg-cyan-50/40">AI recommends filling overhead tanks overnight and putting tanker trucks on standby.</td>
+                    <td className="p-2.5 sm:p-3 font-bold text-slate-800">Monday</td>
+                    <td className="p-2.5 sm:p-3 text-slate-600">Taps still work normally; overhead storage tanks are drained without rationing.</td>
+                    <td className="p-2.5 sm:p-3 text-slate-900 font-semibold bg-cyan-50/40">AI recommends filling overhead tanks overnight and putting tanker trucks on standby.</td>
                   </tr>
                   <tr className="hover:bg-slate-50/50 transition-colors">
-                    <td className="p-3 sm:p-4 font-extrabold text-slate-800">Tuesday</td>
-                    <td className="p-3 sm:p-4 text-slate-600">Underground wells start dropping; coolers run full blast.</td>
-                    <td className="p-3 sm:p-4 text-slate-900 font-semibold bg-cyan-50/40">SMS sent to local councilors; families quietly store water in advance.</td>
+                    <td className="p-2.5 sm:p-3 font-bold text-slate-800">Tuesday</td>
+                    <td className="p-2.5 sm:p-3 text-slate-600">Underground wells start dropping; coolers run full blast.</td>
+                    <td className="p-2.5 sm:p-3 text-slate-900 font-semibold bg-cyan-50/40">SMS sent to local councilors; families quietly store water in advance.</td>
                   </tr>
                   <tr className="hover:bg-slate-50/50 transition-colors">
-                    <td className="p-3 sm:p-4 font-extrabold text-slate-800">Wednesday</td>
-                    <td className="p-3 sm:p-4 text-red-600 font-semibold"><strong>Taps run dry.</strong> Crowds shout outside municipal gates; black-market water prices spike.</td>
-                    <td className="p-3 sm:p-4 text-emerald-800 font-semibold bg-emerald-50/40"><strong>Zero dry taps.</strong> Pre-positioned tankers arrive on time in Nawab Ganj; everyone has water.</td>
+                    <td className="p-2.5 sm:p-3 font-bold text-slate-800">Wednesday</td>
+                    <td className="p-2.5 sm:p-3 text-red-600 font-semibold"><strong>Taps run dry.</strong> Crowds shout outside municipal gates; black-market water prices spike.</td>
+                    <td className="p-2.5 sm:p-3 text-emerald-800 font-semibold bg-emerald-50/40"><strong>Zero dry taps.</strong> Pre-positioned tankers arrive on time in Nawab Ganj; everyone has water.</td>
                   </tr>
                 </tbody>
               </table>
@@ -745,18 +720,18 @@ Next summer, when temperatures pass 40°C in Saharanpur, taps will not run dry i
         </section>
 
         {/* Section 6: Works Offline */}
-        <section className="space-y-4 pt-2">
-          <Reveal delay={70}>
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-slate-900 flex items-center gap-3 border-b border-slate-200 pb-2">
+        <section className="space-y-3 pt-1">
+          <Reveal delay={60}>
+            <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2 border-b border-slate-200 pb-1.5">
               <span className="text-cyan-600">06.</span> Built for Real Life: Works Even Without Internet
             </h2>
 
-            <p className="text-base sm:text-lg md:text-xl text-slate-700 leading-relaxed mt-3">
+            <p className="text-sm sm:text-base text-slate-700 leading-relaxed mt-2">
               In Indian towns, electricity cuts and weak 2G phone signals happen frequently during extreme summer heat.
               If a water officer opens the system during a power cut, a spinning loading icon could leave thousands of families without drinking water.
             </p>
 
-            <p className="text-base sm:text-lg md:text-xl text-slate-700 leading-relaxed">
+            <p className="text-sm sm:text-base text-slate-700 leading-relaxed">
               We built Jal Sankat with a{" "}
               <Term 
                 word="Offline Fallback Mode" 
@@ -769,46 +744,39 @@ Next summer, when temperatures pass 40°C in Saharanpur, taps will not run dry i
         </section>
 
         {/* Conclusion */}
-        <Reveal delay={80}>
-          <section className="space-y-4 pt-4 bg-slate-50 border border-slate-200 rounded-2xl p-6 sm:p-8 my-4 shadow-xs">
-            <h2 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-slate-900">
+        <Reveal delay={70}>
+          <section className="space-y-3 pt-3 bg-slate-50 border border-slate-200 rounded-xl p-4 sm:p-5 my-3 shadow-xs">
+            <h2 className="text-lg font-bold text-slate-900">
               The Big Vision: Turning Panic Into Simple Plans
             </h2>
 
-            <p className="text-base sm:text-lg md:text-xl text-slate-700 leading-relaxed">
+            <p className="text-sm sm:text-base text-slate-700 leading-relaxed">
               Water crises in India are not inevitable curses of nature. They happen because cities find out too late.
             </p>
 
-            <p className="text-base sm:text-lg md:text-xl text-slate-700 leading-relaxed">
+            <p className="text-sm sm:text-base text-slate-700 leading-relaxed">
               When municipal officers gain <strong>72 hours of advance notice</strong>, a humanitarian disaster turns into a calm, orderly plan.
               Water trucks arrive on time. Underground wells are saved from drying out. Families get clean water with peace and dignity.
             </p>
 
-            <p className="text-slate-900 font-extrabold text-lg sm:text-xl md:text-2xl pt-2">
+            <p className="text-slate-900 font-bold text-base pt-1">
               *Next summer, when temperatures cross 40°C in Saharanpur, taps will not run dry in silence. Jal Sankat will have protected them 7 days before.*
             </p>
           </section>
         </Reveal>
 
         {/* Footer */}
-        <Reveal delay={60}>
-          <div className="border-t border-slate-200 pt-6 mt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
-              <div className="w-11 h-11 rounded-full bg-gradient-to-tr from-cyan-600 to-indigo-600 flex items-center justify-center text-white font-black text-sm shadow-xs">
+        <Reveal delay={50}>
+          <div className="border-t border-slate-200 pt-4 mt-5 flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2.5">
+              <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-cyan-600 to-indigo-600 flex items-center justify-center text-white font-black text-sm shadow-xs">
                 JS
               </div>
               <div>
-                <h4 className="text-base sm:text-lg font-bold text-slate-800">Jal Sankat (जल संकट)</h4>
-                <p className="text-xs sm:text-sm text-slate-500">Water Stress Early Warning System</p>
+                <h4 className="text-sm sm:text-base font-bold text-slate-800">Jal Sankat (जल संकट)</h4>
+                <p className="text-sm text-slate-500">Water Stress Early Warning System</p>
               </div>
             </div>
-
-            <button
-              onClick={handleCopyBlog}
-              className="w-full sm:w-auto px-5 py-2.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-white text-sm sm:text-base font-bold shadow-md transition-all flex items-center justify-center gap-2"
-            >
-              {copied ? "✓ Copied Easy Markdown!" : "📋 Copy Easy Markdown"}
-            </button>
           </div>
         </Reveal>
 

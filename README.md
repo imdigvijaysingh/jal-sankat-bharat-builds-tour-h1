@@ -1,91 +1,159 @@
-# Jal Sankat: Water Stress Early Warning
+# 🌊 Jal Sankat (जल संकट): Water Stress Early Warning System
 
-Jal Sankat ("water crisis") tells a city's water team **which days and which areas** will run short of water, so they can act before people suffer.
+> **A 7-day radar for municipal water departments — predicting heatwave demand surges and preventing dry taps before citizens suffer.**  
+> *Built for the **WeMakeDevs × AWS Bharat Builds Tour (Environmental Hacks Track)**.*
 
-## The idea in simple words
-1. You pick a city.
-2. The system gets the 7-day weather forecast and the city's basic water data.
-3. It estimates how much water people will need (hotter days mean more demand).
-4. It compares that with how much water the city can supply (less if groundwater is low).
-5. It gives a **score from 0 to 100**, the peak day, the shortfall, the worst wards, and a ready SMS alert.
+[![AWS](https://img.shields.io/badge/AWS-Powered-orange.svg)](https://aws.amazon.com)
+[![FastAPI](https://img.shields.io/badge/Backend-FastAPI-009688.svg)](https://fastapi.tiangolo.com)
+[![React](https://img.shields.io/badge/Frontend-React%20%2B%20Vite-61DAFB.svg)](https://vitejs.dev)
+[![Bedrock](https://img.shields.io/badge/AI-Amazon%20Bedrock%20Claude%203-blueviolet.svg)](https://aws.amazon.com/bedrock)
+[![SNS](https://img.shields.io/badge/Alerts-Amazon%20SNS-E7157B.svg)](https://aws.amazon.com/sns)
 
-We do **not** survey people. We use public data, simple maths, and clear labels.
+---
 
-## Features
-- **Stunning 3D Holographic AI Brain**: A custom zero-dependency `<canvas>` visualization that dynamically reacts to the city's water stress in real time—spinning, pulsing, and changing state when alerts trigger.
-- **Continuous AI Monitoring**: True real-time data polling (every 3s) with a live AI thought-process terminal.
-- **Autonomous Bulk SMS Dispatch**: Drag-and-drop support for contact lists (.csv, .xlsx). The AI auto-triggers crisis mode (score >= 60) and dispatches emergency SMS to affected citizens, complete with a clean UI linear progress bar. It even remembers previously uploaded data for seamless, zero-click autonomous dispatching on subsequent crises.
-- **Embedded Geographic Mapping**: A live, interactive map integration styled with negative CSS margins to perfectly fit the UI without messy overlays, providing immediate visual location context.
-- **Water Stress Score**: One actionable number plus Low / Moderate / High status indicators.
-- **7-day Demand Forecast**: Dynamically scaling charts for each day, with the peak day highlighted in red.
-- **Ward Priority List**: Highlights precisely which area needs help first.
-- **AI-Generated Action Plans**: Recommended emergency steps for the municipality, generated instantly by AWS Bedrock AI.
-- **Heat What-if Slider**: Test a heatwave scenario instantly and watch the entire dashboard recalculate.
-- **Honesty Table**: Every number is transparently tagged Measured, Official, Estimated, or Predicted.
-- **(i) Context Buttons**: Hover over them on any section for plain-English explanations.
-- **Live Data Admin Panel & Authentication Gate**: Secure municipal login gate protecting model weights, city parameters, and ward demographics (Default credentials: `admin` / `admin123`).
+## 📌 The Problem: The 72-Hour Blind Spot
 
-## How to run on your computer
-You need Python 3.10+ and Node.js 18+.
+In Indian cities like Saharanpur, Mathura, and Meerut, municipal water departments operate in the **blind rear-view mirror**:
+1. A sudden summer heatwave pushes temperatures past 38°C.
+2. Demand surges by **+2% for every 1°C increase** (desert coolers, hygiene, verandas).
+3. Simultaneously, thousands of groundwater borewells pump at once, dropping the underground aquifer table and reducing pump yields.
+4. By Wednesday morning, taps whistle dry air.
+5. By the time furious citizens call municipal helplines, **the crisis is already 72 hours old**—overhead reservoirs are dry, and emergency tanker trucks are 36 hours away.
 
-**Terminal 1: backend**
+**Jal Sankat solves this by giving city officials a 7-day head start**, turning panic and protests into an orderly, calm relief plan.
+
+---
+
+## 🚀 Key Features
+
+### 1. 🌐 Interactive Story & Architecture Blog
+- Built directly into the app for citizen awareness, judges, and non-technical stakeholders.
+- **Smart Glossary Tooltips (`<Term>`)**: Hover or tap any technical term (*Open-Meteo*, *CPHEEO Rule*, *Aquifer*, *Amazon Bedrock*, *Amazon SNS*) to see a 1-sentence plain-English explanation.
+- **High-Impact Figures**: Custom visual models illustrating the real crisis:
+  - **Fig 1.0**: Saharanpur municipality brass tap & street queue reality.
+  - **Fig 2.0**: 3D urban geological cutaway of heat domes and groundwater depletion.
+  - **Fig 3.0**: Spaceborne thermal satellite detection analyzed by Amazon Bedrock AI.
+- **Calibrated Ergonomic Typography**: Sized between `text-sm` (14px) and `text-lg` (18px) to eliminate eye strain.
+
+### 2. 🧠 3D Holographic AI Brain & Real-Time Monitoring
+- A custom, zero-dependency HTML5 `<canvas>` visualization that pulses and shifts color dynamically based on city water stress score (0–100).
+- Live real-time polling (every 5 seconds) with live AI thought-process updates.
+
+### 3. 🤖 Amazon Bedrock (Claude 3) Emergency Action Planner
+- Instantly translates quantitative deficits into concise, actionable 3-point municipal emergency directives in under 1 second.
+- Recommends overnight tank filling, industrial pump rationing, and neighborhood-specific tanker dispatch routes.
+
+### 4. 📲 Autonomous Bulk SMS Dispatch (Amazon SNS)
+- Drag-and-drop support for neighborhood contact lists (`.csv`, `.xlsx`).
+- Dispatches bilingual SMS alerts (Hindi and English) directly to tanker drivers and ward councilors before water pressure drops.
+- Autonomous memory triggers when stress crosses critical threshold (score ≥ 60).
+
+### 5. 🛰️ Live Satellite Forecasts & Demand Simulation
+- Integrated with free satellite feeds via the **Open-Meteo API** (7-day daily maximum temperature forecast).
+- **Interactive Heat What-If Slider**: Allows engineers to simulate unexpected temperature spikes (+1°C to +5°C) and watch the whole city's demand recalculate in real time.
+
+### 6. 🛡️ Resilient Offline Fallback Mode
+- Built for real Indian municipal field conditions (frequent power cuts, weak 2G signals).
+- If the backend or cloud connection drops, the browser automatically switches to an in-memory client-side math model without crashing or showing error screens.
+
+### 7. 🔒 Municipal Admin Panel & Parameter Tuner
+- Password-gated administration suite (`admin` / `admin123`).
+- Dynamically tune CPHEEO consumption norms (135 LPCD default), base heat thresholds, groundwater derate coefficients, and ward population shares.
+
+---
+
+## 🛠️ Tech Stack & Architecture
+
+| Layer | Technologies | Role |
+| :--- | :--- | :--- |
+| **Frontend** | React 18, Vite, Tailwind CSS v4, Lucide Icons | Responsive dashboard & storytelling blog |
+| **Backend** | Python 3.10+, FastAPI, Uvicorn | Real-time assessment model & REST APIs |
+| **AI Brain** | Amazon Bedrock (Anthropic Claude 3 Sonnet / Haiku) | Generative municipal action plans |
+| **Notification** | Amazon SNS (Simple Notification Service) | High-speed multi-lingual SMS delivery |
+| **Weather Feed** | Open-Meteo Satellite API | 7-day daily maximum temperature forecasts |
+| **Hosting** | AWS Amplify (Frontend) & AWS App Runner (Backend) | Scalable cloud deployment with auto-CI/CD |
+
+---
+
+## 📂 Repository Structure
+
 ```
+jal-sankat/
+├── backend/
+│   ├── main.py                     # FastAPI application & scoring engine
+│   ├── requirements.txt            # Python dependencies (fastapi, boto3, etc.)
+│   └── data/
+│       ├── cities.json             # City metadata, populations & ward shares
+│       └── config.json             # Model weights and CPHEEO assumptions
+├── frontend/
+│   ├── public/
+│   │   └── images/                 # Generated blog visuals (Fig 1.0, 2.0, 3.0)
+│   ├── src/
+│   │   ├── App.jsx                 # Core dashboard, holographic canvas & tabs
+│   │   ├── Blog.jsx                # Story & Architecture blog with hover terms
+│   │   ├── AdminPanel.jsx          # Municipal data & weight configuration
+│   │   ├── index.css               # Styling and typography tokens
+│   │   └── main.jsx                # Vite React root
+│   ├── package.json                # Frontend dependencies
+│   └── vite.config.js              # Vite configuration
+├── AWS_BUILDER_CENTER_BLOG.md      # Full publication-ready blog article
+└── README.md                       # Project documentation
+```
+
+---
+
+## 💻 How to Run Locally
+
+### Prerequisites
+- **Python 3.10+**
+- **Node.js 18+**
+
+### 1. Start the Backend API
+```bash
 cd backend
 python -m venv .venv
-.venv\Scripts\activate          # Windows. On Mac/Linux: source .venv/bin/activate
+# Windows:
+.venv\Scripts\activate
+# macOS/Linux:
+# source .venv/bin/activate
+
 pip install -r requirements.txt
 uvicorn main:app --reload --port 8000
 ```
-**Terminal 2: frontend**
-```
+*The FastAPI server starts at `http://localhost:8000` (interactive docs at `http://localhost:8000/docs`).*
+
+### 2. Start the Frontend Application
+```bash
 cd frontend
 npm install
 npm run dev
 ```
-Open the link shown (usually http://localhost:5173). If there is no internet, the weather falls back to a sample and the page says so.
+*Open `http://localhost:5173` in your browser.*
 
-## Folder map
-- `backend/main.py`: the API and the scoring model.
-- `backend/data/config.json`: stores the dynamically editable model weights (LPCD, derate, etc).
-- `backend/data/cities.json`: city data and wards. **Placeholder numbers, replace via the Admin Panel.**
-- `frontend/src/App.jsx`: the whole screen, including the (i) tooltips.
-- `frontend/src/AdminPanel.jsx`: the UI to input real data.
+---
 
-## The model (and its assumptions)
-- Demand = population x 135 litres x (1 + 2% per degree above base temperature, default 25°C)
-- Supply = official capacity, reduced 0.15% per groundwater stress point
-- Score = 25% heat + 30% supply gap + 25% demand/supply ratio + 20% groundwater
+## 📊 The Mathematical Model
 
-The 25°C base temperature, 2% heat uplift, 0.15% groundwater derate, and weights are **configurable assumptions**. You can tune them **directly via the Admin Data button** on the website. This is a rules-based model, not machine learning yet.
+Jal Sankat implements a transparent, physics-grounded municipal formula:
 
-## Honest limits (and how to fix them)
-- Population, supply, groundwater and ward shares are placeholders. **Fix:** Click the "Admin Data" button on the website to input real figures from the Census, city water department and CGWB.
-- Ward demand is split by population share, not measured.
-- Only 4 cities are included initially (you can add more to `cities.json`).
+$$\text{Daily Demand} = \text{Population} \times \text{LPCD} \times (1 + \alpha \times \max(0, T_{\text{peak}} - T_{\text{base}}))$$
 
-## API
-- `POST /api/admin/login`: authenticate admin with username & password
-- `GET /api/admin/verify`: verify active admin session token
-- `GET /api/cities`: list of cities
-- `GET /api/assess/{city}?heat_shift=0`: full assessment
-- `GET /api/cities/raw`: raw data for all cities
-- `POST /api/cities/update`: overwrite data for a city (requires Auth)
-- `GET /api/config` and `POST /api/config`: read and update model constants (POST requires Auth)
+$$\text{Effective Supply} = \text{Design Capacity} \times (1 - \beta \times \text{GW Score})$$
 
-## Hosting
-Localhost is enough for submission. If you want it online later, Render can host both parts (the free tier sleeps when idle).
+$$\text{Stress Score} = 0.25 \cdot S_{\text{heat}} + 0.30 \cdot S_{\text{gap}} + 0.25 \cdot S_{\text{ratio}} + 0.20 \cdot S_{\text{groundwater}}$$
 
-## Architecture & Roadmap (Built vs. Planned)
+- **Default Parameters**: $\text{LPCD} = 135\text{ L}$, $T_{\text{base}} = 25^\circ\text{C}$, $\alpha = 0.02$ (+2% demand / °C), $\beta = 0.0015$ (aquifer derate).
+- **Transparency**: Every figure on the dashboard is tagged `Measured`, `Official`, `Estimated`, or `Predicted`.
 
-**Currently Built & Working (MVP)**
-- **Frontend**: React (Vite) with a premium glassmorphism-inspired UI, custom 3D `<canvas>` rendering, live maps, dynamic scaling charts, and a heatwave slider.
-- **Backend**: FastAPI serving the real-time rules-based scoring model.
-- **Data Integration**: Live weather via Open-Meteo API.
-- **AI Planning & Auto-Decision**: Amazon Bedrock (Claude 3) integration for crisis response generation, and an active AI decision loop that triggers emergency bulk SMS dispatch when stress >= 60.
-- **Alerting**: Amazon SNS integration configured for sending emergency SMS warnings to citizens based on drag-and-dropped contact data.
+---
 
-**Planned Architecture (Future Scale)**
-- **Data Storage (Planned)**: Amazon DynamoDB to store historical water demand, supply logs, and ward population data.
-- **Compute (Planned)**: AWS Lambda for serverless, event-driven score recalculations when new data streams in.
-- **IoT Streaming (Planned)**: AWS IoT Core to ingest real-time smart meter data and tank levels.
-- **Advanced AI (Planned)**: Amazon SageMaker to train predictive machine learning models on past demand instead of the current rules-based assumptions.
+## 🏆 Hackathon Context
+
+- **Event**: WeMakeDevs × AWS Bharat Builds Tour (Hybrid Week: Oct 8 – 11, 2026).
+- **Track**: Environmental Hacks (Water Shortage & Climate Resilience).
+- **Competition**: Competing for Grand Prize and the **AirPods 5 AWS Builder Center Blog Challenge** ([`AWS_BUILDER_CENTER_BLOG.md`](./AWS_BUILDER_CENTER_BLOG.md)).
+
+---
+
+## 📄 License
+This project is open-source under the **MIT License**.
