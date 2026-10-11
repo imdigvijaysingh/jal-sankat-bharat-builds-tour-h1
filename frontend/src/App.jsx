@@ -94,8 +94,45 @@ export default function App() {
   const [showAdmin, setShowAdmin] = useState(false);
   const [authToken, setAuthToken] = useState(() => localStorage.getItem("adminToken") || "");
   const [showAuthModal, setShowAuthModal] = useState(false);
-  const [activeView, setActiveView] = useState("dashboard");
+  
+  const getInitialView = () => {
+    if (typeof window === "undefined") return "dashboard";
+    const path = window.location.pathname.toLowerCase();
+    const hash = window.location.hash.toLowerCase();
+    return (path.includes("/blug") || path.includes("/blog") || hash.includes("blug") || hash.includes("blog"))
+      ? "blog"
+      : "dashboard";
+  };
+
+  const [activeView, setActiveView] = useState(getInitialView);
   const [dismissBanner, setDismissBanner] = useState(false);
+
+  const navigateToView = (view) => {
+    setActiveView(view);
+    const targetPath = view === "blog" ? "/blug" : "/";
+    if (window.location.pathname !== targetPath) {
+      window.history.pushState(null, "", targetPath);
+    }
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    const handleLocationChange = () => {
+      const path = window.location.pathname.toLowerCase();
+      const hash = window.location.hash.toLowerCase();
+      if (path.includes("/blug") || path.includes("/blog") || hash.includes("blug") || hash.includes("blog")) {
+        setActiveView("blog");
+      } else {
+        setActiveView("dashboard");
+      }
+    };
+    window.addEventListener("popstate", handleLocationChange);
+    window.addEventListener("hashchange", handleLocationChange);
+    return () => {
+      window.removeEventListener("popstate", handleLocationChange);
+      window.removeEventListener("hashchange", handleLocationChange);
+    };
+  }, []);
 
   const handleOpenAdmin = () => {
     if (authToken) {
@@ -271,7 +308,7 @@ export default function App() {
       <nav className={`mx-auto mb-4 relative z-20 flex items-center justify-between flex-wrap gap-2 ${activeView === "blog" ? "w-full max-w-full px-1" : "max-w-6xl"}`}>
         <div className="flex items-center gap-1.5 p-1 bg-white/80 backdrop-blur-md rounded-xl border border-slate-200 shadow-xs">
           <button
-            onClick={() => setActiveView("dashboard")}
+            onClick={() => navigateToView("dashboard")}
             className={`px-3 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition-all flex items-center gap-1.5 ${
               activeView === "dashboard"
                 ? "bg-slate-900 text-white shadow-xs"
@@ -283,7 +320,7 @@ export default function App() {
           </button>
           
           <button
-            onClick={() => setActiveView("blog")}
+            onClick={() => navigateToView("blog")}
             className={`px-3 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition-all flex items-center gap-1.5 ${
               activeView === "blog"
                 ? "bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-xs"
@@ -300,7 +337,7 @@ export default function App() {
 
         {activeView === "dashboard" && (
           <button
-            onClick={() => setActiveView("blog")}
+            onClick={() => navigateToView("blog")}
             className="text-xs font-bold text-cyan-700 hover:text-cyan-800 bg-cyan-50/80 hover:bg-cyan-100 border border-cyan-200 px-3 py-1.5 rounded-lg transition-all hidden md:flex items-center gap-1.5"
           >
             <span>💧</span>
@@ -312,7 +349,7 @@ export default function App() {
 
       {activeView === "blog" ? (
         <div className="w-full max-w-full relative z-10">
-          <Blog onBackToDashboard={() => setActiveView("dashboard")} />
+          <Blog onBackToDashboard={() => navigateToView("dashboard")} />
         </div>
       ) : (
         <div className="max-w-6xl mx-auto space-y-6 relative z-10">
