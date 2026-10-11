@@ -1,25 +1,86 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 
-// Interactive Glossary Term with Easy Hover & Tap Explanation
+// Interactive Glossary Term with Smart Boundary-Aware Hover & Tap Explanation
 function Term({ word, explain, tag = "Simple Meaning" }) {
   const [active, setActive] = useState(false);
+  const [align, setAlign] = useState("left");
+  const [isTop, setIsTop] = useState(false);
+  const spanRef = useRef(null);
+
+  const updatePosition = () => {
+    if (spanRef.current) {
+      const rect = spanRef.current.getBoundingClientRect();
+      const screenWidth = window.innerWidth;
+      
+      // Horizontal alignment: detect proximity to edges
+      if (rect.left < 160) {
+        setAlign("left");
+      } else if (screenWidth - rect.right < 160) {
+        setAlign("right");
+      } else {
+        setAlign("center");
+      }
+
+      // Vertical alignment: if too close to top of viewport, open downwards
+      if (rect.top < 130) {
+        setIsTop(true);
+      } else {
+        setIsTop(false);
+      }
+    }
+  };
+
+  const handleOpen = () => {
+    updatePosition();
+    setActive(true);
+  };
+
+  const handleClose = () => {
+    setActive(false);
+  };
+
+  const toggle = (e) => {
+    e.stopPropagation();
+    if (!active) {
+      updatePosition();
+      setActive(true);
+    } else {
+      setActive(false);
+    }
+  };
+
+  let alignClasses = "left-1/2 -translate-x-1/2";
+  let arrowXClasses = "left-1/2 -translate-x-1/2";
+  if (align === "left") {
+    alignClasses = "left-0 translate-x-0";
+    arrowXClasses = "left-4";
+  } else if (align === "right") {
+    alignClasses = "right-0 left-auto translate-x-0";
+    arrowXClasses = "right-4";
+  }
+
+  const verticalClasses = isTop ? "top-full mt-2" : "bottom-full mb-2";
+  const arrowYClasses = isTop 
+    ? "bottom-full -mb-1 border-t-transparent border-b-slate-900" 
+    : "top-full -mt-1 border-b-transparent border-t-slate-900";
 
   return (
     <span 
+      ref={spanRef}
       className="relative inline-block cursor-help group mx-0.5 align-baseline"
-      onMouseEnter={() => setActive(true)}
-      onMouseLeave={() => setActive(false)}
-      onClick={() => setActive(!active)}
+      onMouseEnter={handleOpen}
+      onMouseLeave={handleClose}
+      onClick={toggle}
     >
       <span className="font-semibold text-cyan-800 bg-cyan-50 hover:bg-cyan-100/90 border-b-2 border-dotted border-cyan-500 px-1.5 py-0.5 rounded transition-all inline-flex items-center gap-1 shadow-xs">
         <span>{word}</span>
         <span className="text-[10px] text-cyan-600 bg-cyan-200/70 rounded-full w-3.5 h-3.5 inline-flex items-center justify-center font-bold">?</span>
       </span>
 
-      {/* Floating Popover Card */}
+      {/* Floating Popover Card - Smart boundary clamped */}
       <span 
         role="tooltip"
-        className={`pointer-events-none transition-all duration-200 absolute z-50 bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 sm:w-72 p-3 rounded-xl bg-slate-900/95 text-white text-xs shadow-2xl backdrop-blur-md border border-slate-700 leading-relaxed font-sans ${
+        className={`pointer-events-none transition-all duration-200 absolute z-50 ${verticalClasses} ${alignClasses} w-64 sm:w-72 max-w-[calc(100vw-2.5rem)] p-3 rounded-xl bg-slate-900/95 text-white text-xs shadow-2xl backdrop-blur-md border border-slate-700 leading-relaxed font-sans ${
           active ? "opacity-100 scale-100" : "opacity-0 scale-95 pointer-events-none"
         }`}
       >
@@ -30,7 +91,7 @@ function Term({ word, explain, tag = "Simple Meaning" }) {
         <span className="text-slate-200 block text-xs leading-normal font-normal">
           {explain}
         </span>
-        <span className="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-4 border-transparent border-t-slate-900"></span>
+        <span className={`absolute ${arrowYClasses} ${arrowXClasses} border-4 border-transparent`}></span>
       </span>
     </span>
   );
