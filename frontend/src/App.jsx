@@ -95,6 +95,7 @@ export default function App() {
   const [authToken, setAuthToken] = useState(() => localStorage.getItem("adminToken") || "");
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [activeView, setActiveView] = useState("dashboard");
+  const [dismissBanner, setDismissBanner] = useState(false);
 
   const handleOpenAdmin = () => {
     if (authToken) {
@@ -392,10 +393,10 @@ export default function App() {
           </div>
         </header>
 
-        {isDemoMode && (
+        {isDemoMode && !dismissBanner && (
           <div className="bg-gradient-to-r from-blue-50/90 via-cyan-50/90 to-indigo-50/90 border border-cyan-200/80 text-cyan-900 px-4 py-2.5 rounded-xl flex items-center justify-between gap-3 shadow-xs backdrop-blur-md">
             <div className="flex items-center gap-2 text-xs font-semibold">
-              <span className="flex h-2 w-2 relative">
+              <span className="flex h-2 w-2 relative shrink-0">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-cyan-600"></span>
               </span>
@@ -403,6 +404,13 @@ export default function App() {
                 <strong className="font-bold text-cyan-950">Cloud Standalone Mode:</strong> Running live Open-Meteo weather and water stress models in browser. Connect cloud backend via <code className="bg-white/90 px-1.5 py-0.5 rounded font-mono text-[10px] border border-cyan-200">VITE_API_BASE_URL</code> to enable AWS Bedrock & SNS.
               </span>
             </div>
+            <button 
+              onClick={() => setDismissBanner(true)}
+              className="text-cyan-700 hover:text-cyan-950 hover:bg-cyan-200/60 rounded-lg w-6 h-6 flex items-center justify-center transition-all text-sm font-bold shrink-0 cursor-pointer"
+              title="Close notice"
+            >
+              ✕
+            </button>
           </div>
         )}
 
